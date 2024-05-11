@@ -6,6 +6,7 @@ class Die:
         self.sides = []
         for i in range(sides):
             self.sides.append( Side(i + 1) ) # create a side with i+1 dots
+        self.curSide = self.sides[0]
     
     def getNumSides(self):
         return len(self.sides)
@@ -13,6 +14,8 @@ class Die:
     #returns value of a calculated side
     def rollDie(self):
         iSide = self.rollSide()
+        self.curSide = iSide
+
         num = iSide.getCalculate()
         return num
 
@@ -29,6 +32,10 @@ class Side:
     
     def getCalculate(self):
         #todo dot calculations
+        return len(self.dots)
+    
+    def getDots(self):
+        #todo return dots for gem in DrawService graphics.py
         return len(self.dots)
     
     # USE Mod ATK,DEF,GOLD etc

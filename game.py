@@ -4,8 +4,6 @@ import graphics
 
 d = dice.Die(6)
 
-
-
 # print(top)
 # print(results)
 
@@ -19,10 +17,33 @@ clock = pg.time.Clock()
 
 WIDTH = 1920
 HEIGHT = 1080
-screen = graphics.startScreen(WIDTH, HEIGHT)
+DrawService = graphics.DrawService(WIDTH, HEIGHT)
 
 going = True
+
+playerDice = []
+for i in range(5):
+    playerDice.append(dice.Die(6))
+
+total = 0
+
 while going:
+    DrawService.resetFrame()
+    
     for event in pg.event.get():
         if event.type == pg.QUIT:
-            going = False 
+            going = False
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_SPACE:
+                total = 0
+                for die in playerDice:
+                    total += die.rollDie()
+                print(total)
+            if event.key == pg.K_ESCAPE:
+                going = False
+
+    DrawService.drawDice(playerDice)
+    DrawService.drawValue(total)
+
+    pg.display.flip()
+    clock.tick(60)
