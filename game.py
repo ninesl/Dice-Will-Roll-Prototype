@@ -15,8 +15,8 @@ pg.display.set_caption("Dwarf Dice")
 
 clock = pg.time.Clock()
 
-WIDTH = 1920
-HEIGHT = 1080
+WIDTH = 1600
+HEIGHT = 900
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 
 going = True
@@ -29,16 +29,18 @@ total = 0
 
 while going:
     DrawService.resetFrame()
-    
+
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
+        elif event.type == pg.VIDEORESIZE:
+            DrawService.setScreen(event.w, event.h)
+
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 total = 0
                 for die in playerDice:
                     total += die.rollDie()
-                print(total)
             if event.key == pg.K_ESCAPE:
                 going = False
 
