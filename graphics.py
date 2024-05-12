@@ -1,5 +1,4 @@
 import pygame as pg
-import dice
 
 class DrawService:
     transparent = pg.Color(0,0,0,0)
@@ -16,10 +15,9 @@ class DrawService:
 
     def setScreen(self, WIDTH, HEIGHT):
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
-
         self.dieSide = int(WIDTH / self.gridWidth)
 
-        self.font = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
+        self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
         self.resetFrame()
 
 
@@ -39,6 +37,8 @@ class DrawService:
         self.screen.blit(dieFace, [x + 4, y + 4]) #shadow
         pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=15)
         self.screen.blit(dieFace, [x, y])
+
+        return dieFace.get_rect().move(x,y) #return rect
     
     #draws pips onto face. Call after drawDieFace()
     def drawPips(self, x, y, pipGrid):
@@ -72,27 +72,36 @@ class DrawService:
         pipGridNum = 7
         pipGrid = self.getPipGrid(d, pipGridNum)
 
-        self.drawDieFace(x, y)
+        dieRect = self.drawDieFace(x, y)
         self.drawPips(x, y, pipGrid)
+
+        #for clickable obj
+        return (d, dieRect)
 
     def setPipColor(self, pipToDraw, color, border_radius):
         pg.draw.rect(pipToDraw, color, pipToDraw.get_rect(), border_radius=border_radius)
 
-
     def drawDice(self, dice):
         x = int(self.dieSide * self.gridWidth / 6) #starting row of dice
         y = self.dieSide
+        diceAndRect = [] #(d, dieRect)
         for die in dice:
-            self.drawDie(die, x, y)
+            diceAndRect.append(self.drawDie(die, x, y))
             x += self.dieSide * 2 # two grid spaces over
+        
+        return diceAndRect
 
     def drawValue(self, num):
         x = self.dieSide * (self.gridWidth / 2) - (self.dieSide / 2)
         y = self.dieSide * 3
-        img = self.font.render(str(num), True, self.shadow)
+        self.drawText(num, x, y)
+
+    def drawText(self, text, x, y):
+        img = self.gameFont.render(str(text), True, self.shadow)
         self.screen.blit(img, (x+2,y+2))
-        img = self.font.render(str(num), True, pg.Color(255,255,255))
+        img = self.gameFont.render(str(text), True, pg.Color(255,255,255))
         self.screen.blit(img, (x,y))
+
 
     def getPipGrid(self, d, pipGridNum):
         numPips = d.curSide.getPips()

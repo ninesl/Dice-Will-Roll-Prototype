@@ -7,6 +7,7 @@ class Die:
         for i in range(sides):
             self.sides.append( Side(i + 1) ) # create a side with i+1 pips
         self.curSide = self.sides[0]
+        self.curSideRect = None
     
     def getNumSides(self):
         return len(self.sides)

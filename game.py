@@ -1,6 +1,7 @@
 import pygame as pg
 import dice
 import graphics
+import events
 
 d = dice.Die(6)
 
@@ -18,6 +19,7 @@ clock = pg.time.Clock()
 WIDTH = 1600
 HEIGHT = 900
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
+EventService = events.EventService()
 
 going = True
 
@@ -26,9 +28,12 @@ for i in range(5):
     playerDice.append(dice.Die(6))
 
 total = 0
+curDie = []
 
 while going:
     DrawService.resetFrame()
+    diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
+    DrawService.drawValue(total)
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -36,6 +41,10 @@ while going:
         elif event.type == pg.VIDEORESIZE:
             DrawService.setScreen(event.w, event.h)
 
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1: #left mouse button
+                EventService.findRectClicked(diceAndRect)
+                
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 total = 0
@@ -44,8 +53,6 @@ while going:
             if event.key == pg.K_ESCAPE:
                 going = False
 
-    DrawService.drawDice(playerDice)
-    DrawService.drawValue(total)
 
     pg.display.flip()
     clock.tick(60)
