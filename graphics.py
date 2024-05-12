@@ -9,7 +9,7 @@ class DrawService:
         self.gridWidth = 14
 
         # self.screenColor = self.transparent
-        self.screenColor = pg.Color(50,50,50)
+        self.screenColor = pg.Color(60,55,45)
         
         # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         self.setScreen(WIDTH, HEIGHT)
