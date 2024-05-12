@@ -5,7 +5,7 @@ class Die:
     def __init__(self, sides):
         self.sides = []
         for i in range(sides):
-            self.sides.append( Side(i + 1) ) # create a side with i+1 dots
+            self.sides.append( Side(i + 1) ) # create a side with i+1 pips
         self.curSide = self.sides[0]
     
     def getNumSides(self):
@@ -25,28 +25,28 @@ class Die:
 
 class Side:
     def __init__(self, value):
-        self.dots = []
+        self.pips = []
         self.modEnum = None
         for i in range(value):
-            self.dots.append(Dot())
+            self.pips.append(Pip())
     
     def getCalculate(self):
-        #todo dot calculations
-        return len(self.dots)
+        #todo pip calculations
+        return len(self.pips)
     
-    def getDots(self):
-        #todo return dots for gem in DrawService graphics.py
-        return len(self.dots)
+    def getPips(self):
+        #todo return pips for gem in DrawService graphics.py
+        return len(self.pips)
     
     # USE Mod ATK,DEF,GOLD etc
     # def setModSide(self, modEnum):
     #     self.modEnum = modEnum
         
-class Dot:
+class Pip:
     def __init__(self):
         self.gem = None
-    # def __init__(self, dotMod):
-    #     self.gem = dotMod
+    # def __init__(self, pipMod):
+    #     self.gem = pipMod
 
 # class Mod(Enum):
 #     ATK = enum.auto()
