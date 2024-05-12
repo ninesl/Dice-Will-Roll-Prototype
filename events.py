@@ -15,4 +15,4 @@ class EventService:
         self.update_pos()  # Update the position each time a click is detected
         for die, rect in diceAndRect:
             if rect.collidepoint(pg.mouse.get_pos()):
-                print(f"Clicked on die with value: {die.curSide.getCalculate()}")
+                die.select()

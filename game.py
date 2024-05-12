@@ -5,11 +5,10 @@ import events
 
 d = dice.Die(6)
 
-# print(top)
-# print(results)
-
 pg.init()
 pg.display.set_caption("Dwarf Dice")
+window_icon = pg.image.load("assets/pickaxe.png")
+pg.display.set_icon(window_icon)
 # music = pg.mixer.Sound("audio/rs.mp3")
 # music.play(-1)
 # music.set_volume(.3)
@@ -18,6 +17,7 @@ clock = pg.time.Clock()
 
 WIDTH = 1600
 HEIGHT = 900
+
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 EventService = events.EventService()
 
@@ -28,13 +28,10 @@ for i in range(5):
     playerDice.append(dice.Die(6))
 
 total = 0
-curDie = []
+for die in playerDice:
+    die.rollDie()
 
 while going:
-    DrawService.resetFrame()
-    diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
-    DrawService.drawValue(total)
-
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
@@ -49,10 +46,17 @@ while going:
             if event.key == pg.K_SPACE:
                 total = 0
                 for die in playerDice:
-                    total += die.rollDie()
+                    if die.isSelected:
+                        total += die.num
+                    else:
+                        die.rollDie()
+
             if event.key == pg.K_ESCAPE:
                 going = False
 
+    DrawService.resetFrame()
+    diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
+    DrawService.drawValue(total)
 
     pg.display.flip()
     clock.tick(60)

@@ -7,18 +7,22 @@ class Die:
         for i in range(sides):
             self.sides.append( Side(i + 1) ) # create a side with i+1 pips
         self.curSide = self.sides[0]
-        self.curSideRect = None
+        self.isSelected = False
+        self.num = -1
     
     def getNumSides(self):
         return len(self.sides)
     
+    def select(self):
+        self.isSelected = not self.isSelected #invert selection flag
+
     #returns value of a calculated side
     def rollDie(self):
         iSide = self.rollSide()
         self.curSide = iSide
 
-        num = iSide.getCalculate()
-        return num
+        self.num = iSide.getCalculate()
+        return self.num
 
     # returns random side
     def rollSide(self):

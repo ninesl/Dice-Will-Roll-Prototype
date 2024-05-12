@@ -2,10 +2,11 @@ import pygame as pg
 
 class DrawService:
     transparent = pg.Color(0,0,0,0)
-    shadow = pg.Color(0,0,0,175)
+    shadow = pg.Color(0,0,0,105)
 
     def __init__(self, WIDTH, HEIGHT):
         self.gridWidth = 14
+        self.shadowLength = int(WIDTH / 400)
 
         # self.screenColor = self.transparent
         self.screenColor = pg.Color(60,55,45)
@@ -26,15 +27,23 @@ class DrawService:
         # background = pg.image.load('assets/background.png')
         # self.screen.blit(background, (0,0))
 
-    def drawDieFace(self, x, y):
+    def drawDieFace(self, x, y, die):
         dieFace = pg.Surface((self.dieSide, self.dieSide), pg.SRCALPHA)
-
+        
         #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
         dieFaceColor = pg.Color(255,255,255)
 
         dieFace.fill(self.transparent) #background of surface
+
+        if die.isSelected is True:
+            dieFace = pg.transform.scale(dieFace,(int(self.dieSide * 1.2), int(self.dieSide * 1.2)))
+            #scaled shadow
+            x = int(x - self.dieSide * .1)
+            y = int(y - self.dieSide * .1)
+
         pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=15)
-        self.screen.blit(dieFace, [x + 4, y + 4]) #shadow
+        self.screen.blit(dieFace, [x + self.shadowLength, y + self.shadowLength])
+        
         pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=15)
         self.screen.blit(dieFace, [x, y])
 
@@ -72,7 +81,7 @@ class DrawService:
         pipGridNum = 7
         pipGrid = self.getPipGrid(d, pipGridNum)
 
-        dieRect = self.drawDieFace(x, y)
+        dieRect = self.drawDieFace(x, y, d)
         self.drawPips(x, y, pipGrid)
 
         #for clickable obj
