@@ -119,20 +119,20 @@ class DrawService:
         pipX = x
         
         #iterates through grid, draws a pip if 0 isnt found
+        i = 0
         for row in pipGrid:
             pipX = x
-            i = 0
             for space in row:
-                if space != 0: #no pip
-                    if space == 1: # pip
-                        pg.draw.rect(pipToDraw, sidePips[i].getColor(), pipToDraw.get_rect(), border_radius=self.dieRadius)
-                        self.screen.blit(pipToDraw, [pipX, pipY])
+                if space == 1: # pip found
+                    pg.draw.rect(pipToDraw, sidePips[i].getPipColor(), pipToDraw.get_rect(), border_radius=int(self.dieRadius / 2))
+                    i += 1
                     self.screen.blit(pipToDraw, [pipX, pipY])
+                # self.screen.blit(pipToDraw, [pipX, pipY])
                 pipX += pipSize
             pipY += pipSize
 
     def getPipGrid(self, d, pipGridNum):
-        numPips = d.curSide.getPips()
+        numPips = d.curSide.getNum()
         pipGrid = [[0]*pipGridNum for _ in range(pipGridNum)] #7x7 array
         
         match numPips:

@@ -65,11 +65,22 @@ class Side:
 class Pip:
     def __init__(self):
         self.gem = Mod.BASE
+        match random.randint(0,4):
+            case 0:
+                self.gem = Mod.BASE
+            case 1:
+                self.gem = Mod.ATK
+            case 2:
+                self.gem = Mod.DEF
+            case 3:
+                self.gem = Mod.GOLD
+
+
     def getPipColor(self):
         return self.gem.value
 
 class Mod(Enum):
-    BASE = pg.Color(0,0,0,50)
-    ATK = pg.Color(255,0,0,50)
-    DEF = pg.Color(0,100,255,50)
-    GOLD = pg.Color(255,215,0,50)
+    BASE = pg.Color(0,0,0,230)
+    ATK = pg.Color(255,0,0,230)
+    DEF = pg.Color(0,100,255,230)
+    GOLD = pg.Color(255,215,0,230)
