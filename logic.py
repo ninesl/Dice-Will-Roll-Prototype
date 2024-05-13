@@ -1,6 +1,6 @@
 import pygame as pg
 from collections import Counter
-from enum import Enum, auto
+from enum import Enum
 
 class DiceHand(Enum):
     NO_HAND = "No Hand"
@@ -39,7 +39,7 @@ class LogicService:
         #     if die.isSelected:
         #         handDicePips.append(die.curSide.getPips())
         
-        handDicePips = [die.curSide.getPips() for die in playerDice if die.isSelected]
+        handDicePips = [die.curSide.getNum() for die in playerDice if die.isSelected]
 
         count = Counter(handDicePips)
         values = list(count.values())

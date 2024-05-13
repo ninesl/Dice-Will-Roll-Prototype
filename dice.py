@@ -1,6 +1,7 @@
 # import enum
 import random
 import pygame as pg
+from enum import Enum
 
 class Die:
     def __init__(self, sides, color):
@@ -32,7 +33,11 @@ class Die:
         return self.sides[random.randint(0, self.getNumSides() - 1)]
     
     def getColor(self):
-        return self.curSide.color if not self.isHovered else self.curSide.color + pg.Color(0,0,0, 150)
+        if self.isHovered:
+            self.curSide.color.a = 150 #slightly transparent
+        else:
+            self.curSide.color.a = 255 #set to opaque
+        return self.curSide.color
 
 class Side:
     def __init__(self, value, color):
@@ -48,6 +53,9 @@ class Side:
     
     def getPips(self):
         #todo return pips for gem in DrawService graphics.py
+        return self.pips
+    
+    def getNum(self):
         return len(self.pips)
     
     # USE Mod ATK,DEF,GOLD etc
@@ -56,11 +64,12 @@ class Side:
         
 class Pip:
     def __init__(self):
-        self.gem = None
-    # def __init__(self, pipMod):
-    #     self.gem = pipMod
+        self.gem = Mod.BASE
+    def getPipColor(self):
+        return self.gem.value
 
-# class Mod(Enum):
-#     ATK = enum.auto()
-#     DEF = enum.auto()
-#     GOLD = enum.auto()
+class Mod(Enum):
+    BASE = pg.Color(0,0,0,170)
+    ATK = pg.Color(255,0,0,170)
+    DEF = pg.Color(0,100,255,170)
+    GOLD = pg.Color(255,215,0,170)
