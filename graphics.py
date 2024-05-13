@@ -6,6 +6,8 @@ class DrawService:
     selectedColor = pg.Color(0,153,0,255)
     screenColor = pg.Color(40,40,40)
 
+    dieRadius = 15
+
     def __init__(self, WIDTH, HEIGHT):
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
@@ -40,13 +42,6 @@ class DrawService:
 
         dieFace.fill(self.transparent) #background of surface
 
-        # if die.isSelected is True:
-            
-        #     dieFace = pg.transform.scale(dieFace,(int(self.dieSide * 1.2), int(self.dieSide * 1.2)))
-        #     #scaled shadow
-        #     pg.draw.rect(dieFace, self.selectedColor, dieFace.get_rect(), border_radius=15)
-        #     self.screen.blit(dieFace, [x - 5, y - 5])
-
         if die.isSelected:
             # Apply scaling and outline for selected die
             outline_thickness = 5  # Thickness of the outline
@@ -57,58 +52,27 @@ class DrawService:
                                    y - self.dieSide * 0.1 - outline_thickness,
                                    scaled_die_side + outline_thickness * 2,
                                    scaled_die_side + outline_thickness * 2)
-            pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=15)
+        
+            pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=self.dieRadius)
 
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
 
 
-        pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=15)
+        #shadow
+        pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=self.dieRadius)
         self.screen.blit(dieFace, [x + self.shadowLength, y + self.shadowLength])
 
-        pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=15)
+        #background for hovering
+        pg.draw.rect(dieFace, pg.Color(200,200,200), dieFace.get_rect(), border_radius=self.dieRadius)
+        self.screen.blit(dieFace, [x, y])
+
+        #die face
+        pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=self.dieRadius)
         self.screen.blit(dieFace, [x, y])
 
         return dieFace.get_rect().move(x,y) #return rect
     
-    #draws pips onto face. Call after drawDieFace()
-    def drawPips(self, x, y, pipGrid):
-        pipSize = int(self.dieSide / len(pipGrid))
-
-        #TODO pip color find based off pip object
-        pipColor = pg.Color(0,0,0)
-        pipToDraw = pg.Surface((pipSize, pipSize), pg.SRCALPHA)
-
-        pipToDraw.fill(self.transparent) #background of pip
-        pg.draw.rect(pipToDraw, pipColor, pipToDraw.get_rect(), border_radius=5)
-
-        pipY = y - pipSize
-        pipX = x
-        
-        #iterates through grid, draws a pip if 0 isnt found
-        for row in pipGrid:
-            pipX = x
-            for space in row:
-                if space != 0: #regular pip
-                    self.setPipColor(pipToDraw, pipColor, 5)
-                    if space == 2: #regular pip
-                        self.setPipColor(pipToDraw, pg.Color("Purple"), 5)
-                        self.screen.blit(pipToDraw, [pipX, pipY])
-                    self.screen.blit(pipToDraw, [pipX, pipY])
-                pipX += pipSize
-            pipY += pipSize
-    
-    def drawDie(self, d, x, y):
-        # check for die attributes, color pips etc..
-        pipGridNum = 7
-        pipGrid = self.getPipGrid(d, pipGridNum)
-
-        dieRect = self.drawDieFace(x, y, d)
-        self.drawPips(x, y, pipGrid)
-
-        #for clickable obj
-        return (d, dieRect)
-
     def drawDice(self, dice):
         diceAndRect = [] #(d, dieRect)
         x = self.diceX
@@ -117,6 +81,17 @@ class DrawService:
             diceAndRect.append(self.drawDie(die, x, y))
             x += self.dieSpacing # num grid spaces over
         return diceAndRect
+
+    def drawDie(self, d, x, y):
+        # check for die attributes, color pips etc..
+        pipGridNum = 7
+        pipGrid = self.getPipGrid(d, pipGridNum)
+
+        dieRect = self.drawDieFace(x, y, d)
+        self.drawPips(x, y, pipGrid, d)
+
+        #for clickable obj
+        return (d, dieRect)
 
     def drawValue(self, num):
         x = self.dieSide
@@ -129,8 +104,32 @@ class DrawService:
         img = self.gameFont.render(str(text), True, pg.Color(255,255,255))
         self.screen.blit(img, (x,y))
 
-    def setPipColor(self, pipToDraw, color, border_radius):
-        pg.draw.rect(pipToDraw, color, pipToDraw.get_rect(), border_radius=border_radius)
+    #draws pips onto face. Call after drawDieFace()
+    def drawPips(self, x, y, pipGrid, d):
+        pipSize = int(self.dieSide / len(pipGrid))
+        sidePips = d.curSide.getPips()
+
+        #TODO pip color find based off pip object
+
+        pipToDraw = pg.Surface((pipSize, pipSize), pg.SRCALPHA)
+
+        pipToDraw.fill(self.transparent) #background of pip
+
+        pipY = y - pipSize
+        pipX = x
+        
+        #iterates through grid, draws a pip if 0 isnt found
+        for row in pipGrid:
+            pipX = x
+            i = 0
+            for space in row:
+                if space != 0: #no pip
+                    if space == 1: # pip
+                        pg.draw.rect(pipToDraw, sidePips[i].getColor(), pipToDraw.get_rect(), border_radius=self.dieRadius)
+                        self.screen.blit(pipToDraw, [pipX, pipY])
+                    self.screen.blit(pipToDraw, [pipX, pipY])
+                pipX += pipSize
+            pipY += pipSize
 
     def getPipGrid(self, d, pipGridNum):
         numPips = d.curSide.getPips()
