@@ -7,20 +7,23 @@ class DrawService:
     def __init__(self, WIDTH, HEIGHT):
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
+        
+        self.setScreen(WIDTH, HEIGHT)
+
+        self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
+        self.diceY = self.dieSide
 
         # self.screenColor = self.transparent
         self.screenColor = pg.Color(60,55,45)
         
         # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        self.setScreen(WIDTH, HEIGHT)
+        self.resetFrame()
 
     def setScreen(self, WIDTH, HEIGHT):
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         self.dieSide = int(WIDTH / self.gridWidth)
 
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
-        self.resetFrame()
-
 
     def resetFrame(self):
         self.screen.fill(self.screenColor)
@@ -87,17 +90,14 @@ class DrawService:
         #for clickable obj
         return (d, dieRect)
 
-    def setPipColor(self, pipToDraw, color, border_radius):
-        pg.draw.rect(pipToDraw, color, pipToDraw.get_rect(), border_radius=border_radius)
-
     def drawDice(self, dice):
-        x = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
-        y = self.dieSide
         diceAndRect = [] #(d, dieRect)
+        x = self.diceX
+        y = self.diceY
         for die in dice:
             diceAndRect.append(self.drawDie(die, x, y))
             x += int(self.dieSide * 1.5)# num grid spaces over
-        
+        pg.display.update()
         return diceAndRect
 
     def drawValue(self, num):
@@ -111,6 +111,8 @@ class DrawService:
         img = self.gameFont.render(str(text), True, pg.Color(255,255,255))
         self.screen.blit(img, (x,y))
 
+    def setPipColor(self, pipToDraw, color, border_radius):
+        pg.draw.rect(pipToDraw, color, pipToDraw.get_rect(), border_radius=border_radius)
 
     def getPipGrid(self, d, pipGridNum):
         numPips = d.curSide.getPips()
@@ -149,5 +151,4 @@ class DrawService:
                 pipGrid[2] = [0,1,0,1,0,1,0]
                 pipGrid[4] = [0,1,0,1,0,1,0]
                 pipGrid[6] = [0,1,0,1,0,1,0]
-
         return pipGrid

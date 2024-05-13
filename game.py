@@ -3,6 +3,7 @@ import dice
 import graphics
 import events
 import logic
+import animate
 
 d = dice.Die(6)
 
@@ -22,6 +23,7 @@ HEIGHT = 900
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 EventService = events.EventService()
 LogicService = logic.LogicService()
+AnimateService = animate.AnimateService(DrawService, clock)
 
 going = True
 
@@ -33,7 +35,9 @@ total = 0
 for die in playerDice:
     die.rollDie()
 
+#TODO FPS math?
 while going:
+    # playerDice.sort(key=lambda x: x.curSide.getPips())
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
@@ -47,8 +51,8 @@ while going:
                 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
+                AnimateService.shakeDice(playerDice)
                 LogicService.rollDice(playerDice)
-                # DrawService.shakeDice()
             if event.key == pg.K_ESCAPE:
                 going = False
 
