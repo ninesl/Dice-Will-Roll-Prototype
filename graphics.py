@@ -44,7 +44,7 @@ class DrawService:
 
         if die.isSelected:
             # Apply scaling and outline for selected die
-            outline_thickness = 5  # Thickness of the outline
+            outline_thickness = self.dieRadius/3  # Thickness of the outline
             scaled_die_side = int(self.dieSide * 1.2)
             dieFace = pg.transform.scale(dieFace, (scaled_die_side, scaled_die_side))
 
@@ -52,12 +52,10 @@ class DrawService:
                                    y - self.dieSide * 0.1 - outline_thickness,
                                    scaled_die_side + outline_thickness * 2,
                                    scaled_die_side + outline_thickness * 2)
-        
             pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=self.dieRadius)
 
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
-
 
         #shadow
         pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=self.dieRadius)
@@ -120,13 +118,29 @@ class DrawService:
         
         #iterates through grid, draws a pip if 0 isnt found
         i = 0
+        pipRadius = int(self.dieRadius / 2)
         for row in pipGrid:
             pipX = x
             for space in row:
                 if space == 1: # pip found
-                    pg.draw.rect(pipToDraw, sidePips[i].getPipColor(), pipToDraw.get_rect(), border_radius=int(self.dieRadius / 2))
-                    i += 1
+                    # Apply scaling and outline for selected die
+                    outline_thickness = 5  # Thickness of the outline
+                    scaled_pip = int(pipSize * 1.1)
+
+                    # Calculate outline rectangle position and size
+                    outline_rect = pg.Rect(pipX - pipSize * .15,
+                                       pipY- pipSize * .14,
+                                       scaled_pip + outline_thickness,
+                                       scaled_pip + outline_thickness)
+                    
+                    pg.draw.rect(self.screen, self.shadow, outline_rect, border_radius=pipRadius)
+                    # self.screen.blit(pipToDraw, [pipX, pipY])
+                    
+                    pipToDraw.fill(self.transparent)  # Reset the `pipToDraw` surface
+                    pg.draw.rect(pipToDraw, sidePips[i].getPipColor(), pipToDraw.get_rect(), border_radius=pipRadius)
                     self.screen.blit(pipToDraw, [pipX, pipY])
+
+                    i += 1
                 # self.screen.blit(pipToDraw, [pipX, pipY])
                 pipX += pipSize
             pipY += pipSize
