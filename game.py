@@ -2,6 +2,7 @@ import pygame as pg
 import dice
 import graphics
 import events
+import logic
 
 d = dice.Die(6)
 
@@ -20,6 +21,7 @@ HEIGHT = 900
 
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 EventService = events.EventService()
+LogicService = logic.LogicService()
 
 going = True
 
@@ -41,22 +43,17 @@ while going:
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
                 EventService.findRectClicked(diceAndRect)
+                LogicService.addDice(playerDice)
                 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
-                total = 0
-                for die in playerDice:
-                    if die.isSelected:
-                        total += die.num
-                    else:
-                        die.rollDie()
-
+                LogicService.rollDice(playerDice)
             if event.key == pg.K_ESCAPE:
                 going = False
 
     DrawService.resetFrame()
     diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
-    DrawService.drawValue(total)
+    DrawService.drawValue(LogicService.total)
 
     pg.display.flip()
     clock.tick(60)

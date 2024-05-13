@@ -43,7 +43,7 @@ class DrawService:
 
         pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=15)
         self.screen.blit(dieFace, [x + self.shadowLength, y + self.shadowLength])
-        
+
         pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=15)
         self.screen.blit(dieFace, [x, y])
 
@@ -101,8 +101,8 @@ class DrawService:
         return diceAndRect
 
     def drawValue(self, num):
-        x = self.dieSide * (self.gridWidth / 2) - (self.dieSide / 2)
-        y = self.dieSide * 3
+        x = self.dieSide
+        y = self.dieSide * 2
         self.drawText(num, x, y)
 
     def drawText(self, text, x, y):
