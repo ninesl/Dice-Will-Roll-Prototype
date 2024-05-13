@@ -91,18 +91,18 @@ class DrawService:
         pg.draw.rect(pipToDraw, color, pipToDraw.get_rect(), border_radius=border_radius)
 
     def drawDice(self, dice):
-        x = int(self.dieSide * self.gridWidth / 6) #starting row of dice
+        x = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
         y = self.dieSide
         diceAndRect = [] #(d, dieRect)
         for die in dice:
             diceAndRect.append(self.drawDie(die, x, y))
-            x += self.dieSide * 2 # two grid spaces over
+            x += int(self.dieSide * 1.5)# num grid spaces over
         
         return diceAndRect
 
     def drawValue(self, num):
         x = self.dieSide
-        y = self.dieSide * 2
+        y = self.dieSide
         self.drawText(num, x, y)
 
     def drawText(self, text, x, y):

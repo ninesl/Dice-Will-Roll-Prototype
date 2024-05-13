@@ -48,12 +48,14 @@ while going:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 LogicService.rollDice(playerDice)
+                # DrawService.shakeDice()
             if event.key == pg.K_ESCAPE:
                 going = False
 
     DrawService.resetFrame()
     diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
-    DrawService.drawValue(LogicService.total)
+    LogicService.findHand(playerDice)
+    DrawService.drawValue(LogicService.hand)
 
     pg.display.flip()
     clock.tick(60)
