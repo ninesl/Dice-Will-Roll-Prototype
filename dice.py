@@ -44,7 +44,7 @@ class Side:
         self.pips = []
         self.modEnum = None
         self.color = color
-        for i in range(value):
+        for _ in range(value):
             self.pips.append(Pip())
     
     def getCalculate(self):
@@ -69,7 +69,7 @@ class Pip:
         return self.gem.value
 
 class Mod(Enum):
-    BASE = pg.Color(0,0,0,170)
-    ATK = pg.Color(255,0,0,170)
-    DEF = pg.Color(0,100,255,170)
-    GOLD = pg.Color(255,215,0,170)
+    BASE = pg.Color(0,0,0,50)
+    ATK = pg.Color(255,0,0,50)
+    DEF = pg.Color(0,100,255,50)
+    GOLD = pg.Color(255,215,0,50)
