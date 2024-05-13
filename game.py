@@ -5,8 +5,6 @@ import events
 import logic
 import animate
 
-d = dice.Die(6)
-
 pg.init()
 pg.display.set_caption("Dwarf Dice")
 window_icon = pg.image.load("assets/pickaxe.png")
@@ -17,8 +15,8 @@ pg.display.set_icon(window_icon)
 
 clock = pg.time.Clock()
 
-WIDTH = 1600
-HEIGHT = 900
+WIDTH = 1920
+HEIGHT = 1080
 
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 EventService = events.EventService()
@@ -28,8 +26,12 @@ AnimateService = animate.AnimateService(DrawService, clock)
 going = True
 
 playerDice = []
-for i in range(5):
-    playerDice.append(dice.Die(6))
+
+playerDice.append(dice.Die(6, pg.Color(255,255,255)))
+playerDice.append(dice.Die(6, pg.Color(255,0,255)))
+playerDice.append(dice.Die(6, pg.Color(255,255,0)))
+playerDice.append(dice.Die(6, pg.Color(0,255,255)))
+playerDice.append(dice.Die(6, pg.Color(100,100,100)))
 
 total = 0
 for die in playerDice:
@@ -37,7 +39,7 @@ for die in playerDice:
 
 #TODO FPS math?
 while going:
-    # playerDice.sort(key=lambda x: x.curSide.getPips())
+    # playerDice.sort(key=lambda x: x.curSide.getPips(), reverse=True)
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
@@ -46,7 +48,7 @@ while going:
 
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
-                EventService.findRectClicked(diceAndRect)
+                EventService.selectRectDie(diceAndRect)
                 LogicService.addDice(playerDice)
                 
         if event.type == pg.KEYDOWN:
@@ -56,10 +58,13 @@ while going:
             if event.key == pg.K_ESCAPE:
                 going = False
 
+
     DrawService.resetFrame()
     diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
     LogicService.findHand(playerDice)
-    DrawService.drawValue(LogicService.hand)
+    DrawService.drawValue(LogicService.hand.value)
+                
+    EventService.dieHovered(diceAndRect)
 
     pg.display.flip()
     clock.tick(60)

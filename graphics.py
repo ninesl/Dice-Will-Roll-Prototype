@@ -3,6 +3,8 @@ import pygame as pg
 class DrawService:
     transparent = pg.Color(0,0,0,0)
     shadow = pg.Color(0,0,0,105)
+    selectedColor = pg.Color(0,153,0,255)
+    screenColor = pg.Color(40,40,40)
 
     def __init__(self, WIDTH, HEIGHT):
         self.gridWidth = 14
@@ -14,7 +16,6 @@ class DrawService:
         self.diceY = self.dieSide
 
         # self.screenColor = self.transparent
-        self.screenColor = pg.Color(60,55,45)
         
         # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         self.resetFrame()
@@ -22,6 +23,7 @@ class DrawService:
     def setScreen(self, WIDTH, HEIGHT):
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         self.dieSide = int(WIDTH / self.gridWidth)
+        self.dieSpacing = int(self.dieSide * 1.5)
 
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
 
@@ -34,15 +36,32 @@ class DrawService:
         dieFace = pg.Surface((self.dieSide, self.dieSide), pg.SRCALPHA)
         
         #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
-        dieFaceColor = pg.Color(255,255,255)
+        dieFaceColor = die.getColor()
 
         dieFace.fill(self.transparent) #background of surface
 
-        if die.isSelected is True:
-            dieFace = pg.transform.scale(dieFace,(int(self.dieSide * 1.2), int(self.dieSide * 1.2)))
-            #scaled shadow
+        # if die.isSelected is True:
+            
+        #     dieFace = pg.transform.scale(dieFace,(int(self.dieSide * 1.2), int(self.dieSide * 1.2)))
+        #     #scaled shadow
+        #     pg.draw.rect(dieFace, self.selectedColor, dieFace.get_rect(), border_radius=15)
+        #     self.screen.blit(dieFace, [x - 5, y - 5])
+
+        if die.isSelected:
+            # Apply scaling and outline for selected die
+            outline_thickness = 5  # Thickness of the outline
+            scaled_die_side = int(self.dieSide * 1.2)
+            dieFace = pg.transform.scale(dieFace, (scaled_die_side, scaled_die_side))
+
+            outline_rect = pg.Rect(x - self.dieSide * 0.1 - outline_thickness,
+                                   y - self.dieSide * 0.1 - outline_thickness,
+                                   scaled_die_side + outline_thickness * 2,
+                                   scaled_die_side + outline_thickness * 2)
+            pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=15)
+
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
+
 
         pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=15)
         self.screen.blit(dieFace, [x + self.shadowLength, y + self.shadowLength])
@@ -96,8 +115,7 @@ class DrawService:
         y = self.diceY
         for die in dice:
             diceAndRect.append(self.drawDie(die, x, y))
-            x += int(self.dieSide * 1.5)# num grid spaces over
-        pg.display.update()
+            x += self.dieSpacing # num grid spaces over
         return diceAndRect
 
     def drawValue(self, num):

@@ -1,14 +1,17 @@
 # import enum
 import random
+import pygame as pg
 
 class Die:
-    def __init__(self, sides):
-        self.sides = []
-        for i in range(sides):
-            self.sides.append( Side(i + 1) ) # create a side with i+1 pips
-        self.curSide = self.sides[0]
+    def __init__(self, sides, color):
         self.isSelected = False
         self.num = -1
+        self.isHovered = False
+
+        self.sides = []
+        for i in range(sides):
+            self.sides.append( Side(i + 1, color) ) # create a side with i+1 pips
+        self.curSide = self.sides[0]
     
     def getNumSides(self):
         return len(self.sides)
@@ -27,11 +30,15 @@ class Die:
     # returns random side
     def rollSide(self):
         return self.sides[random.randint(0, self.getNumSides() - 1)]
+    
+    def getColor(self):
+        return self.curSide.color if not self.isHovered else self.curSide.color + pg.Color(0,0,0, 150)
 
 class Side:
-    def __init__(self, value):
+    def __init__(self, value, color):
         self.pips = []
         self.modEnum = None
+        self.color = color
         for i in range(value):
             self.pips.append(Pip())
     

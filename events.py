@@ -11,8 +11,16 @@ class EventService:
         print("got here")
         return rect.collidepoint(self.pos)
     
-    def findRectClicked(self, diceAndRect):
-        self.update_pos()  # Update the position each time a click is detected
+    def selectRectDie(self, diceAndRect):
+        self.update_pos() # Update the position each time a click is detected
         for die, rect in diceAndRect:
-            if rect.collidepoint(pg.mouse.get_pos()):
+            if rect.collidepoint(self.pos):
                 die.select()
+
+    def dieHovered(self, diceAndRect):
+        self.update_pos()
+        for die, rect in diceAndRect:
+            if rect.collidepoint(self.pos):
+                die.isHovered = True
+            if not rect.collidepoint(self.pos):
+                die.isHovered = False
