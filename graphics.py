@@ -1,10 +1,11 @@
 import pygame as pg
+from shapes import randomColor
 
 class DrawService:
     transparent = pg.Color(0,0,0,0)
     shadow = pg.Color(0,0,0,105)
     selectedColor = pg.Color(255,100,50,34)
-    screenColor = pg.Color(40,40,40)
+    screenColor = randomColor()
 
     dieRadius = 15
 
@@ -128,8 +129,8 @@ class DrawService:
                     scaled_pip = int(pipSize * 1.1)
 
                     # Calculate outline rectangle position and size
-                    outline_rect = pg.Rect(pipX - pipSize * .15,
-                                       pipY- pipSize * .14,
+                    outline_rect = pg.Rect(pipX - pipSize * .13,
+                                       pipY- pipSize * .13,
                                        scaled_pip + outline_thickness,
                                        scaled_pip + outline_thickness)
                     
