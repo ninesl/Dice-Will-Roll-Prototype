@@ -3,21 +3,21 @@ from collections import Counter
 from enum import Enum
 
 class DiceHand(Enum):
-    NO_HAND = "No Hand"
-    ONE_PAIR = "One Pair"
-    TWO_PAIR = "Two Pair"
-    THREE_OF_A_KIND = "Three of a Kind"
-    STRAIGHT_SMALL = "Small Straight"
-    STRAIGHT_LARGE = "Large Straight"
-    FULL_HOUSE = "Full House"
-    FOUR_OF_A_KIND = "Four of a Kind"
-    FIVE_OF_A_KIND = "Five of a Kind"
-    HIGH_DIE = "High Die"
+    NO_HAND = ["No Hand", 0]
+    ONE_PAIR = ["One Pair", 1]
+    TWO_PAIR = ["Two Pair", 2]
+    THREE_OF_A_KIND = ["Three of a Kind", 3]
+    STRAIGHT_SMALL = ["Small Straight", 4]
+    STRAIGHT_LARGE = ["Large Straight", 5]
+    FULL_HOUSE = ["Full House", 6]
+    FOUR_OF_A_KIND = ["Four of a Kind", 7]
+    FIVE_OF_A_KIND = ["Five of a Kind", 8]
+    HIGH_DIE = ["High Die", 1]
 
 class LogicService:
     def __init__(self):
         self.total = 0
-        self.hand = "No Hand"
+        self.hand = DiceHand.NO_HAND
 
     def addDice(self, playerDice):
         self.total = 0
