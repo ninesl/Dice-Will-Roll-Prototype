@@ -14,31 +14,36 @@ class DiceHand(Enum):
     HIGH_DIE = ["High Die", 1]
 
 class LogicService:
-    def __init__(self):
+    def __init__(self, playerDice):
         self.total = 0
         self.hand = DiceHand.NO_HAND
+        self.playerDice = playerDice
 
-    def addDice(self, playerDice):
+    def addDice(self):
         self.total = 0
-        for die in playerDice:
+        for die in self.playerDice:
             if die.isSelected:
                 self.total += die.num
     
-    def rollDice(self, playerDice):
+    def rollDice(self):
         self.total = 0
-        for die in playerDice:
+        for die in self.playerDice:
             if die.isSelected:
                 self.total += die.num
             else:
                 die.rollDie()
 
-    def findHand(self, playerDice):
+    def getSelectedDice(self):
+        return [die for die in self.playerDice if die.isSelected]
+        
+
+    def findHand(self):
         # handDicePips = []
         # for die in playerDice:
         #     if die.isSelected:
         #         handDicePips.append(die.curSide.getPips())
         
-        handDicePips = [die.curSide.getNum() for die in playerDice if die.isSelected]
+        handDicePips = [die.curSide.getNum() for die in self.playerDice if die.isSelected]
 
         count = Counter(handDicePips)
         values = list(count.values())

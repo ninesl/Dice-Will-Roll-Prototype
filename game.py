@@ -12,19 +12,19 @@ pg.display.set_caption("Dwarf Dice")
 window_icon = pg.image.load("assets/pickaxe.png")
 pg.display.set_icon(window_icon)
 
-# music = pg.mixer.Sound("assets/audio/theme.mp3")
-# music.play(-1)
-# music.set_volume(.3)
+music = pg.mixer.Sound("assets/audio/theme.mp3")
+music.play(-1)
+music.set_volume(.3)
 
 
 clock = pg.time.Clock()
 
 WIDTH = 1920
 HEIGHT = 1080
-NUM_SHAPES = 500
+NUM_SHAPES = 250
 
 playerDice = []
-rangeMin, rangeMax = 0,250
+rangeMin, rangeMax = 0,255
 playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
                                        rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
@@ -43,9 +43,9 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
 
 DrawService = graphics.DrawService(WIDTH, HEIGHT)
 EventService = events.EventService()
-LogicService = logic.LogicService()
-AnimateService = animate.AnimateService(DrawService, clock)
-Background = shapes.Background(WIDTH, HEIGHT, NUM_SHAPES, playerDice)
+LogicService = logic.LogicService(playerDice)
+AnimateService = animate.AnimateService(DrawService)
+Background = shapes.Background(WIDTH, HEIGHT, NUM_SHAPES, len(playerDice))
 
 
 total = 0
@@ -65,14 +65,14 @@ while going:
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
                 EventService.selectRectDie(diceAndRect)
-                LogicService.addDice(playerDice)
-                Background.changeShapeColors()
+                LogicService.addDice()
+                Background.changeShapeColors(LogicService.getSelectedDice())
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 # Background.changeDirection()
                 AnimateService.shakeDice(playerDice)
-                LogicService.rollDice(playerDice)
+                LogicService.rollDice()
             if event.key == pg.K_ESCAPE:
                 going = False
 
@@ -82,7 +82,7 @@ while going:
     Background.runBackground(DrawService.screen)
     
     diceAndRect = DrawService.drawDice(playerDice) #returns list of (die, rect) for EventService
-    LogicService.findHand(playerDice)
+    LogicService.findHand()
     DrawService.drawValue(LogicService.hand.value[0])
                 
     EventService.dieHovered(diceAndRect)

@@ -3,14 +3,14 @@ import pygame as pg
 import math
 
 class Background:
-    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES, playerDice):
+    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES, numDice):
         #Adjust to set bounds for shapes bouncing
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
+        self.numDice = numDice
 
         #makes NUM_SHAPES to use with speed (.5)
-        self.shapes = [self.newShape(.5) for _ in range(NUM_SHAPES)]
-        self.playerDice = playerDice
+        self.shapes = [self.newShape(.2) for _ in range(NUM_SHAPES)]
 
     def runBackground(self, screen):
         for shape in self.shapes:
@@ -29,8 +29,7 @@ class Background:
             shape.xBack = not shape.xBack
             shape.yBack = not shape.yBack
 
-    def changeShapeColors(self):
-        selectedDice = [die for die in self.playerDice if die.isSelected]
+    def changeShapeColors(self, selectedDice):
         
         if not selectedDice:
             # Revert all shapes to random colors
@@ -38,7 +37,7 @@ class Background:
                 shape.setTargetColor(randomColor())
             return
         
-        numShapesToChange = len(self.shapes) // (len(self.playerDice) - len(selectedDice) + 10)
+        numShapesToChange = len(self.shapes) // (self.numDice - len(selectedDice) + 4)
         changingShapes = random.sample(self.shapes, numShapesToChange)
         
         # Set the rest of the shapes to random colors
@@ -48,6 +47,7 @@ class Background:
         
         # Change the color of the selected shapes to the color of a selected die
         for shape in changingShapes:
+            #random color out of the selectedDice
             targetColor = random.choice(selectedDice).curSide.color
             targetColor.a = 128
             shape.setTargetColor(targetColor)
@@ -109,7 +109,7 @@ class Shape:
 
     def updateColor(self):
         if self.transitionProgress < 1.0:
-            self.transitionProgress += 0.001  # Adjust the speed of transition here
+            self.transitionProgress += 0.001 # Adjust the speed of transition here
             r = int(self.color.r + (self.targetColor.r - self.color.r) * self.transitionProgress)
             g = int(self.color.g + (self.targetColor.g - self.color.g) * self.transitionProgress)
             b = int(self.color.b + (self.targetColor.b - self.color.b) * self.transitionProgress)

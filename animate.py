@@ -2,9 +2,8 @@ import random
 import pygame as pg
 
 class AnimateService:
-    def __init__(self, DrawService, clock):
+    def __init__(self, DrawService):
         self.DrawService = DrawService
-        self.clock = clock
 
     def shakeDice(self, playerDice):
         oldDiceX = self.DrawService.diceX
