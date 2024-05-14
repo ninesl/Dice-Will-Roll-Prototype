@@ -5,9 +5,8 @@ class Background:
     def __init__(self, WIDTH, HEIGHT):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
-        self.squares = []
-        for i in range(1000):
-            self.squares.append(self.newSquare())
+        #create x squares
+        self.squares = [self.newSquare() for _ in range(1000)]
 
     def runBackground(self, screen):
         for iSquare in self.squares:
@@ -16,9 +15,14 @@ class Background:
 
     def newSquare(self):
         size = random.randint(100,150)
-        squareX = random.randint(0,self.WIDTH)
-        squareY = random.randint(0,self.HEIGHT)
+        squareX = random.randint(0,self.WIDTH - size)
+        squareY = random.randint(0,self.HEIGHT - size)
         return Square(squareX, squareY, .5, size, self.WIDTH, self.HEIGHT)
+    
+    def changeDirection(self):
+        for square in self.squares:
+            square.xBack = not square.xBack
+            square.yBack = not square.yBack
 
 
 class Square:
@@ -30,50 +34,51 @@ class Square:
         self.surf = pg.Surface((size, size))
         self.surf.fill(randomColor())
 
-        if random.randint(0,2) == 1:
-            self.xBack = True
-        else:
-            self.xBack = False
+        self.xBack = random.choice([True, False])
+        self.yBack = random.choice([True, False])
 
-        if random.randint(0,2) == 1:
-            self.yBack = True
-        else:
-            self.yBack = False
+        # if random.randint(0,2) == 1:
+        #     self.xBack = True
+        # else:
+        #     self.xBack = False
+
+        # if random.randint(0,2) == 1:
+        #     self.yBack = True
+        # else:
+        #     self.yBack = False
 
     # logic for square direction, changes direction on collision
     def squarePosition(self):
         oldXBack = self.xBack
         oldYBack = self.yBack
         
-        if self.xBack: #going left
-            x = self.xy[0] - self.incr
-            if x <= 0:
+        if self.xBack:
+            self.xy[0] -= self.incr
+            if self.xy[0] <= 0:
+                self.xy[0] = 0
                 self.xBack = False
-        else: #going right
-            x = self.xy[0] + self.incr
-            if x + self.size >= self.WIDTH:
-                x = self.WIDTH - self.size # keeps inbounds
+        else:
+            self.xy[0] += self.incr
+            if self.xy[0] + self.size >= self.WIDTH:
+                self.xy[0] = self.WIDTH - self.size
                 self.xBack = True
 
-        if self.yBack: #going down
-            y = self.xy[1] - self.incr
-            self.yBack = y >= 0
-        else: #going up
-            y = self.xy[1] + self.incr
-            if y + self.size >= self.HEIGHT:
-                y = self.HEIGHT - self.size # keeps inbounds
-                self.yBack = True  # Change direction to up
+        if self.yBack:
+            self.xy[1] -= self.incr
+            if self.xy[1] <= 0:
+                self.xy[1] = 0
+                self.yBack = False
+        else:
+            self.xy[1] += self.incr
+            if self.xy[1] + self.size >= self.HEIGHT:
+                self.xy[1] = self.HEIGHT - self.size
+                self.yBack = True
 
-        #change color on collision. bool only changes when hit
         if oldXBack != self.xBack or oldYBack != self.yBack:
             self.surf.fill(randomColor())
 
-        self.xy = [x, y]
-
+#returns random grey color for square
 def randomColor():
-    # return pg.Color(rand.randint(80,90), 
-    #                 rand.randint(55,60),
-    #                 rand.randint(25,35))
     num = random.randint(45,80)
     return pg.Color(num, 
                     num,
