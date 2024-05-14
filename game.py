@@ -31,12 +31,22 @@ Background = square.Background(WIDTH, HEIGHT)
 going = True
 
 playerDice = []
-
-playerDice.append(dice.Die(6, pg.Color(rand.randint(0, 255), rand.randint(0, 255),rand.randint(0, 255))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(0, 255), rand.randint(0, 255),rand.randint(0, 255))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(0, 255), rand.randint(0, 255),rand.randint(0, 255))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(0, 255), rand.randint(0, 255),rand.randint(0, 255))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(0, 255), rand.randint(0, 255),rand.randint(0, 255))))
+rangeMin, rangeMax = 50, 150
+playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
+                                       rand.randint(rangeMin, rangeMax),
+                                       rand.randint(rangeMin, rangeMax))))
+playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
+                                       rand.randint(rangeMin, rangeMax),
+                                       rand.randint(rangeMin, rangeMax))))
+playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
+                                       rand.randint(rangeMin, rangeMax),
+                                       rand.randint(rangeMin, rangeMax))))
+playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
+                                       rand.randint(rangeMin, rangeMax),
+                                       rand.randint(rangeMin, rangeMax))))
+playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
+                                       rand.randint(rangeMin, rangeMax),
+                                       rand.randint(rangeMin, rangeMax))))
 
 total = 0
 for die in playerDice:
@@ -58,6 +68,7 @@ while going:
                 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
+                Background.changeDirection()
                 AnimateService.shakeDice(playerDice)
                 LogicService.rollDice(playerDice)
             if event.key == pg.K_ESCAPE:
