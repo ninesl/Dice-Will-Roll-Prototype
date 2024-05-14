@@ -1,4 +1,3 @@
-import pygame as pg
 from collections import Counter
 from enum import Enum
 
