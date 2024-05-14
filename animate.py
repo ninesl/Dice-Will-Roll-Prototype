@@ -10,7 +10,7 @@ class AnimateService:
         oldDiceX = self.DrawService.diceX
         oldDiceY = self.DrawService.diceY
 
-        shake_duration = 15  # Total shakes
+        shake_duration = 20  # Total shakes
         max_shake_range = 15  # Max pixels to shake
 
         # Redraw the dice at new position

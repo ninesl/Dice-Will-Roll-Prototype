@@ -3,7 +3,7 @@ import pygame as pg
 class DrawService:
     transparent = pg.Color(0,0,0,0)
     shadow = pg.Color(0,0,0,105)
-    selectedColor = pg.Color(0,153,0,255)
+    selectedColor = pg.Color(255,100,50,34)
     screenColor = pg.Color(40,40,40)
 
     dieRadius = 15
@@ -14,9 +14,6 @@ class DrawService:
         
         self.setScreen(WIDTH, HEIGHT)
 
-        self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
-        self.diceY = self.dieSide
-
         # self.screenColor = self.transparent
         
         # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -26,6 +23,9 @@ class DrawService:
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
+
+        self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
+        self.diceY = self.dieSide
 
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
 
