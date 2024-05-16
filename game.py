@@ -55,43 +55,43 @@ for die in playerDice:
 
 going = True
 #TODO FPS math?
+
 while going:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
         elif event.type == pg.VIDEORESIZE:
             DrawService.setScreen(event.w, event.h)
+            LogicService.unselectAll()
 
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
-                EventService.selectRectDie(diceAndRect)
+                d = EventService.selectRectDie(diceAndRect)
                 LogicService.addDice()
-                DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice())
+            DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice(), d)
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 # DrawService.BackgroundService.changeDirection()
                 AnimateService.shakeDice(playerDice)
                 LogicService.rollDice()
-
             #left and right arrow keys change background color
             elif event.key == pg.K_LEFT:
-                BACKGROUND_COLOR_RANGE -= 5
+                BACKGROUND_COLOR_RANGE -= 15
                 if BACKGROUND_COLOR_RANGE < 5:
                     BACKGROUND_COLOR_RANGE = 5
                 else:
-                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,     LogicService.getSelectedDice())
+                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
+                    LogicService.unselectAll()
             elif event.key == pg.K_RIGHT:
-                BACKGROUND_COLOR_RANGE += 5
+                BACKGROUND_COLOR_RANGE += 15
                 if BACKGROUND_COLOR_RANGE > 250:
                     BACKGROUND_COLOR_RANGE = 250
                 else:
-                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,     LogicService.getSelectedDice())
-
+                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
+                    LogicService.unselectAll()
             elif event.key == pg.K_ESCAPE:
                 going = False
-
-
 
     DrawService.resetFrame()
 

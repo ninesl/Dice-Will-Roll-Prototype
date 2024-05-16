@@ -8,10 +8,9 @@ class DrawService:
 
     dieRadius = 15
 
-    def __init__(self, WIDTH, HEIGHT, numPlayerDice = 5, NUM_SHAPES = 150, rangeNum = 100):
+    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 150, rangeNum = 100):
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
-        self.numPlayerDice = numPlayerDice
         self.NUM_SHAPES = NUM_SHAPES
         
         self.setScreen(WIDTH, HEIGHT, rangeNum)
@@ -34,7 +33,7 @@ class DrawService:
         self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
         self.diceY = self.dieSide
 
-        self.BackgroundService = shapes.Background(WIDTH, HEIGHT, self.numPlayerDice, self.NUM_SHAPES, rangeNum)
+        self.BackgroundService = shapes.Background(WIDTH, HEIGHT, NUM_SHAPES=self.NUM_SHAPES, colorRangeNum=rangeNum, oneXthOfRocks=6)
         self.setBackgroundColors(rangeNum)
 
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))

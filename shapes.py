@@ -3,14 +3,18 @@ import pygame as pg
 import math
 
 class Background:
-    def __init__(self, WIDTH, HEIGHT, numDice, NUM_SHAPES, colorRangeNum = 100):
+    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 100, colorRangeNum = 100, oneXthOfRocks = 6):
         #Adjust to set bounds for shapes bouncing
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
-        self.numDice = numDice
 
         #makes NUM_SHAPES to use with speed (.5)
         self.shapes = [self.newShape(.2, colorRangeNum) for _ in range(NUM_SHAPES)]
+
+        #rocks that change colors
+        self.numShapesToChange = len(self.shapes) // oneXthOfRocks
+        self.changingShapesArray = []
+        self.changingShapes = []
 
     def runBackground(self, screen):
         for shape in self.shapes:
@@ -29,31 +33,53 @@ class Background:
             shape.xBack = not shape.xBack
             shape.yBack = not shape.yBack
 
-    # going 'deeper' by the level
+    # going 'deeper' by the level...
     def setRockColors(self, num):
         for shape in self.shapes:
             shape.setFullColor(num)
 
-    def changeShapeColors(self, selectedDice):
-        
-        if not selectedDice:
-            # Revert all shapes to random colors
-            self.setRockColors(self.shapes[0].colorRange)
+    #returns the new shapes to change so they can be removed later
+    def addChangingShapes(self, selectedDie):
+        #newShapes are the shapes being added to be accessed later
+        newShapes = random.sample(self.shapes, self.numShapesToChange)
+        #changingShapes is the full list of shapes
+        self.changingShapes.extend(newShapes)
+
+        newColor = selectedDie.curSide.color
+        # Change the color of the selected shapes to the color of a selected die
+        for shape in newShapes:
+            shape.setTargetColor(newColor)
+
+        newShapes.append(selectedDie) #die flag
+
+        self.changingShapesArray.append(newShapes)
+
+    #takes list of shapes to remove, gotten from addChangingShapes()
+    def removeChangingShapes(self, removedShapes):
+        removedShapes.pop() # remove dieflag at the end of array
+        for shape in removedShapes:
+            shape.setFullColor(shape.colorRange)
+        self.changingShapesArray.remove(removedShapes)
+
+    def changeShapeColors(self, selectedDice, selectedDie = None):
+        if not selectedDie:
             return
         
-        numShapesToChange = len(self.shapes) // (self.numDice - len(selectedDice) + 4)
-        changingShapes = random.sample(self.shapes, numShapesToChange)
+        #selectedColors = [die.curSide.color for die in selectedDice]
+
+        # finds last element of shapesList, last element is the die used
+        # this is done when a die is removed from selectedDice
+        if selectedDie not in selectedDice:
+            for shapesList in self.changingShapesArray:
+                if shapesList[-1] is selectedDie:
+                    self.removeChangingShapes(shapesList)
+                    return
+                
+        if not selectedDice:
+            return
         
-        # Set the rest of the shapes to random colors
-        for shape in self.shapes:
-            if shape not in changingShapes:
-                self.setRockColors(self.shapes[0].colorRange)
-        
-        # Change the color of the selected shapes to the color of a selected die
-        for shape in changingShapes:
-            #random color out of the selectedDice
-            targetColor = random.choice(selectedDice).curSide.color
-            shape.setTargetColor(targetColor)
+        self.addChangingShapes(selectedDie)
+
 
 class Shape:
     def __init__(self, x, y, speed, size, WIDTH, HEIGHT, colorRange = 100):
@@ -61,6 +87,7 @@ class Shape:
         self.xy = [x, y]
         self.incr = speed
         self.size = size
+        self.color = randomColor(colorRange)
         self.setFullColor(colorRange)
         self.sides = random.randint(3, 8)
         self.relative_points = self.generateRelativePoints()
@@ -68,7 +95,7 @@ class Shape:
         self.yBack = random.choice([True, False])
 
     def setFullColor(self, colorRange):
-        self.color = randomColor(colorRange)
+        self.transitionProgress = 0.0
         self.colorRange = colorRange
         self.targetColor = self.color
         self.setTargetColor(randomColor(self.colorRange))
@@ -107,8 +134,8 @@ class Shape:
         if y_out_of_bounds:
             self.yBack = not self.yBack
 
-        if x_out_of_bounds or y_out_of_bounds:
-            self.setFullColor(self.colorRange)
+        # if x_out_of_bounds or y_out_of_bounds:
+        #     self.setFullColor(self.colorRange)
     
     def setTargetColor(self, targetColor):
         #should avoid redundant assignments

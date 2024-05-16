@@ -35,7 +35,10 @@ class LogicService:
 
     def getSelectedDice(self):
         return [die for die in self.playerDice if die.isSelected]
-        
+    
+    def unselectAll(self):
+        for die in self.getSelectedDice():
+            die.select()
 
     def findHand(self):
         # handDicePips = []
