@@ -4,7 +4,6 @@ import dice
 import graphics
 import events
 import logic
-import shapes
 import animate
 
 pg.init()
