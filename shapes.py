@@ -61,7 +61,6 @@ class Shape:
         self.xy = [x, y]
         self.incr = speed
         self.size = size
-        self.color = randomColor(colorRange)
         self.setFullColor(colorRange)
         self.sides = random.randint(3, 8)
         self.relative_points = self.generateRelativePoints()
@@ -69,7 +68,9 @@ class Shape:
         self.yBack = random.choice([True, False])
 
     def setFullColor(self, colorRange):
+        self.color = randomColor(colorRange)
         self.colorRange = colorRange
+        self.targetColor = self.color
         self.setTargetColor(randomColor(self.colorRange))
 
     def draw(self, screen):
@@ -106,12 +107,14 @@ class Shape:
         if y_out_of_bounds:
             self.yBack = not self.yBack
 
-        # if x_out_of_bounds or y_out_of_bounds:
-        #     self.setTargetColor(randomColor())
+        if x_out_of_bounds or y_out_of_bounds:
+            self.setFullColor(self.colorRange)
     
     def setTargetColor(self, targetColor):
-        self.targetColor = targetColor
-        self.transitionProgress = 0.0  # Reset transition progress
+        #should avoid redundant assignments
+        if self.targetColor != targetColor:
+            self.targetColor = targetColor
+            self.transitionProgress = 0.0  # Reset transition progress
 
     def updateColor(self, transIncr = .001):
         if self.transitionProgress <= 1.0:
@@ -122,7 +125,6 @@ class Shape:
             self.color = pg.Color(r, g, b)
 
 def randomColor(midRange):
+    # Maintain the range for visual feedback while ensuring consistent transition speed
     num = random.randint(midRange - 5, midRange + 5)
-    # num2 = random.randint(midRange - 5, midRange + 5)
-    # num3 = random.randint(midRange - 5, midRange + 5)
     return pg.Color(num, num, num)

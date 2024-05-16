@@ -70,7 +70,7 @@ while going:
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
-                # Background.changeDirection()
+                # DrawService.BackgroundService.changeDirection()
                 AnimateService.shakeDice(playerDice)
                 LogicService.rollDice()
 
@@ -79,12 +79,14 @@ while going:
                 BACKGROUND_COLOR_RANGE -= 5
                 if BACKGROUND_COLOR_RANGE < 5:
                     BACKGROUND_COLOR_RANGE = 5
-                DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
+                else:
+                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,     LogicService.getSelectedDice())
             elif event.key == pg.K_RIGHT:
                 BACKGROUND_COLOR_RANGE += 5
                 if BACKGROUND_COLOR_RANGE > 250:
                     BACKGROUND_COLOR_RANGE = 250
-                DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
+                else:
+                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,     LogicService.getSelectedDice())
 
             elif event.key == pg.K_ESCAPE:
                 going = False
@@ -98,10 +100,13 @@ while going:
 
     LogicService.findHand()
 
-    DrawService.drawText(BACKGROUND_COLOR_RANGE, 2,0)
+    DrawService.drawText(BACKGROUND_COLOR_RANGE, 2,HEIGHT / 10)
     DrawService.drawValue(LogicService.hand.value[0])
                 
     EventService.dieHovered(diceAndRect)
+
+    fps = int(clock.get_fps())
+    DrawService.drawText(f"fps   {fps}", 2,HEIGHT / 10 * 2)
 
     pg.display.update()
     clock.tick(60)

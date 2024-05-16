@@ -8,7 +8,7 @@ class DrawService:
 
     dieRadius = 15
 
-    def __init__(self, WIDTH, HEIGHT, numPlayerDice = 5, NUM_SHAPES = 250, rangeNum = 100):
+    def __init__(self, WIDTH, HEIGHT, numPlayerDice = 5, NUM_SHAPES = 150, rangeNum = 100):
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
         self.numPlayerDice = numPlayerDice
