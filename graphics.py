@@ -1,26 +1,32 @@
 import pygame as pg
-from shapes import randomColor
+import shapes
 
 class DrawService:
     transparent = pg.Color(0,0,0,0)
     shadow = pg.Color(0,0,0,105)
     selectedColor = pg.Color(255,100,50,34)
-    screenColor = randomColor()
 
     dieRadius = 15
 
-    def __init__(self, WIDTH, HEIGHT):
+    def __init__(self, WIDTH, HEIGHT, numPlayerDice = 5, NUM_SHAPES = 250, rangeNum = 100):
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
+        self.numPlayerDice = numPlayerDice
+        self.NUM_SHAPES = NUM_SHAPES
         
-        self.setScreen(WIDTH, HEIGHT)
+        self.setScreen(WIDTH, HEIGHT, rangeNum)
+
 
         # self.screenColor = self.transparent
         
         # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        self.resetFrame()
 
-    def setScreen(self, WIDTH, HEIGHT):
+    def setBackgroundColors(self, rangeNum, selectedDice = []):
+        self.screenColor = shapes.randomColor(rangeNum)
+        self.BackgroundService.setRockColors(rangeNum)
+        self.BackgroundService.changeShapeColors(selectedDice)
+
+    def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
@@ -28,10 +34,14 @@ class DrawService:
         self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
         self.diceY = self.dieSide
 
+        self.BackgroundService = shapes.Background(WIDTH, HEIGHT, self.numPlayerDice, self.NUM_SHAPES, rangeNum)
+        self.setBackgroundColors(rangeNum)
+
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
 
     def resetFrame(self):
         self.screen.fill(self.screenColor)
+        self.BackgroundService.runBackground(self.screen)
         # background = pg.image.load('assets/background.png')
         # self.screen.blit(background, (0,0))
 

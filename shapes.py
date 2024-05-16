@@ -3,14 +3,14 @@ import pygame as pg
 import math
 
 class Background:
-    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES, numDice):
+    def __init__(self, WIDTH, HEIGHT, numDice, NUM_SHAPES, colorRangeNum = 100):
         #Adjust to set bounds for shapes bouncing
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.numDice = numDice
 
         #makes NUM_SHAPES to use with speed (.5)
-        self.shapes = [self.newShape(.2) for _ in range(NUM_SHAPES)]
+        self.shapes = [self.newShape(.2, colorRangeNum) for _ in range(NUM_SHAPES)]
 
     def runBackground(self, screen):
         for shape in self.shapes:
@@ -18,23 +18,27 @@ class Background:
             shape.updateColor()
             shape.draw(screen)
 
-    def newShape(self, speed):
+    def newShape(self, speed, colorRangeNum):
         size = random.randint(50, 150)
         shapeX = random.randint(0 + size, self.WIDTH - size)
         shapeY = random.randint(0 + size, self.HEIGHT - size)
-        return Shape(shapeX, shapeY, speed, size, self.WIDTH, self.HEIGHT)
+        return Shape(shapeX, shapeY, speed, size, self.WIDTH, self.HEIGHT, colorRangeNum)
 
     def changeDirection(self):
         for shape in self.shapes:
             shape.xBack = not shape.xBack
             shape.yBack = not shape.yBack
 
+    # going 'deeper' by the level
+    def setRockColors(self, num):
+        for shape in self.shapes:
+            shape.setFullColor(num)
+
     def changeShapeColors(self, selectedDice):
         
         if not selectedDice:
             # Revert all shapes to random colors
-            for shape in self.shapes:
-                shape.setTargetColor(randomColor())
+            self.setRockColors(self.shapes[0].colorRange)
             return
         
         numShapesToChange = len(self.shapes) // (self.numDice - len(selectedDice) + 4)
@@ -43,28 +47,30 @@ class Background:
         # Set the rest of the shapes to random colors
         for shape in self.shapes:
             if shape not in changingShapes:
-                shape.setTargetColor(randomColor())
+                self.setRockColors(self.shapes[0].colorRange)
         
         # Change the color of the selected shapes to the color of a selected die
         for shape in changingShapes:
             #random color out of the selectedDice
             targetColor = random.choice(selectedDice).curSide.color
-            targetColor.a = 128
             shape.setTargetColor(targetColor)
 
 class Shape:
-    def __init__(self, x, y, speed, size, WIDTH, HEIGHT):
+    def __init__(self, x, y, speed, size, WIDTH, HEIGHT, colorRange = 100):
         self.WIDTH, self.HEIGHT = WIDTH, HEIGHT
         self.xy = [x, y]
         self.incr = speed
         self.size = size
-        self.setTargetColor(randomColor())
-        self.color = self.targetColor
+        self.color = randomColor(colorRange)
+        self.setFullColor(colorRange)
         self.sides = random.randint(3, 8)
         self.relative_points = self.generateRelativePoints()
-
         self.xBack = random.choice([True, False])
         self.yBack = random.choice([True, False])
+
+    def setFullColor(self, colorRange):
+        self.colorRange = colorRange
+        self.setTargetColor(randomColor(self.colorRange))
 
     def draw(self, screen):
         points = [(self.xy[0] + px, self.xy[1] + py) for px, py in self.relative_points]
@@ -107,16 +113,16 @@ class Shape:
         self.targetColor = targetColor
         self.transitionProgress = 0.0  # Reset transition progress
 
-    def updateColor(self):
-        if self.transitionProgress < 1.0:
-            self.transitionProgress += 0.001 # Adjust the speed of transition here
+    def updateColor(self, transIncr = .001):
+        if self.transitionProgress <= 1.0:
+            self.transitionProgress += transIncr # Adjust the speed of transition here
             r = int(self.color.r + (self.targetColor.r - self.color.r) * self.transitionProgress)
             g = int(self.color.g + (self.targetColor.g - self.color.g) * self.transitionProgress)
             b = int(self.color.b + (self.targetColor.b - self.color.b) * self.transitionProgress)
-            a = int(self.color.a + (self.targetColor.a - self.color.a) * self.transitionProgress)
-            self.color = pg.Color(r, g, b, a)
+            self.color = pg.Color(r, g, b)
 
-def randomColor():
-    num = random.randint(45, 55)
-    alpha = 128  # Set the alpha value for transparency (128 is 50% transparent)
-    return pg.Color(num, num, num, alpha)
+def randomColor(midRange):
+    num = random.randint(midRange - 5, midRange + 5)
+    # num2 = random.randint(midRange - 5, midRange + 5)
+    # num3 = random.randint(midRange - 5, midRange + 5)
+    return pg.Color(num, num, num)
