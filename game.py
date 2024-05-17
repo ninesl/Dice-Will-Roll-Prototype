@@ -15,7 +15,7 @@ pg.display.set_icon(window_icon)
 
 clock = pg.time.Clock()
 
-WIDTH = 1920
+WIDTH =  1920
 HEIGHT = 1080
 
 playerDice = []
@@ -37,7 +37,7 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
 
 
-BACKGROUND_COLOR_RANGE = 150
+BACKGROUND_COLOR_RANGE = 100
 
 SoundService = sounds.SoundService()
 
@@ -46,6 +46,8 @@ AnimateService = animate.AnimateService(DrawService)
 
 EventService = events.EventService()
 LogicService = logic.LogicService(playerDice, DrawService)
+
+SoundService.playMusic()
 
 total = 0
 for die in playerDice:
@@ -61,30 +63,54 @@ while going:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
-        elif event.type == pg.VIDEORESIZE:
-            WIDTH = event.w
-            HEIGHT = event.h
-            DrawService.setScreen(WIDTH, HEIGHT, BACKGROUND_COLOR_RANGE)
-            LogicService.unselectAll()
+        # elif event.type == pg.VIDEORESIZE:
+        #     WIDTH = event.w
+        #     HEIGHT = event.h
+        #     DrawService.setScreen(WIDTH, HEIGHT, BACKGROUND_COLOR_RANGE)
+        #     LogicService.unselectAll()
 
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
                 d = EventService.selectRectDie(diceAndRect)
+                if d:
+                    SoundService.selectDiceSound(d.isSelected)
+                else:
+                    SoundService.diceDict["tap"].play()
                 LogicService.addDice()
-            DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice(), d)
+                DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice(), d)
 
         if event.type == pg.KEYDOWN:
             match event.key:
                 case pg.K_SPACE:
                     # DrawService.BackgroundService.changeDirection()
                     AnimateService.shakeDice(playerDice)
+                    SoundService.diceRollSound(LogicService.rollsLeft)
                     LogicService.rollDice()
                 #Scoring a hand
                 case pg.K_q:
                     AnimateService.shakeDice(playerDice, selected=True)
                     recentHandScore = LogicService.score()
-                        
-                    #roll selected die
+                    SoundService.hitSound(recentHandScore)
+                case pg.K_ESCAPE:
+                    going = False
+
+    DrawService.resetFrame()
+    #returns list of (die, rect) for EventService
+    diceAndRect = DrawService.drawDice(playerDice)
+
+    EventService.dieHovered(diceAndRect)
+
+    LogicService.findHand()
+
+    DrawService.drawTextContent(LogicService)
+
+    
+    fps = int(clock.get_fps())
+    DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
+    pg.display.update()
+    clock.tick(60)
+
+##Old code to change background color
                 #left and right arrow keys change background color
                 # case pg.K_LEFT:
                 #     BACKGROUND_COLOR_RANGE -= 15
@@ -100,22 +126,3 @@ while going:
                 #     else:
                 #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,LogicService.getSelectedDice())
                 #         LogicService.unselectAll()
-
-                case pg.K_ESCAPE:
-                    going = False
-
-    DrawService.resetFrame()
-    #returns list of (die, rect) for EventService
-    diceAndRect = DrawService.drawDice(playerDice)
-
-    EventService.dieHovered(diceAndRect)
-
-    LogicService.findHand()
-
-    DrawService.drawTextContent(LogicService)
-
-    
-    # fps = int(clock.get_fps())
-    # DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
-    pg.display.update()
-    clock.tick(60)
