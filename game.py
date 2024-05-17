@@ -4,16 +4,13 @@ import dice
 import graphics
 import events
 import logic
+import sounds
 import animate
 
 pg.init()
 pg.display.set_caption("Dwarf Dice")
 window_icon = pg.image.load("assets/pickaxe.png")
 pg.display.set_icon(window_icon)
-
-music = pg.mixer.Sound("assets/audio/theme.mp3")
-music.play(-1)
-music.set_volume(.3)
 
 
 clock = pg.time.Clock()
@@ -41,6 +38,8 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
 
 
 BACKGROUND_COLOR_RANGE = 150
+
+SoundService = sounds.SoundService()
 
 DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES = 250, rangeNum=BACKGROUND_COLOR_RANGE)
 AnimateService = animate.AnimateService(DrawService)
@@ -82,6 +81,7 @@ while going:
                     LogicService.rollDice()
                 #Scoring a hand
                 case pg.K_q:
+                    AnimateService.shakeDice(playerDice, selected=True)
                     recentHandScore = LogicService.score()
                         
                     #roll selected die
@@ -100,6 +100,7 @@ while going:
                 #     else:
                 #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,LogicService.getSelectedDice())
                 #         LogicService.unselectAll()
+
                 case pg.K_ESCAPE:
                     going = False
 

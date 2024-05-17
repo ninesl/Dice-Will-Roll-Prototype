@@ -7,6 +7,7 @@ class DrawService:
     selectedColor = pg.Color(255,100,50,34)
 
     dieRadius = 15
+    allHands = ""
 
     def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 150, rangeNum = 100):
         self.gridWidth = 14
@@ -15,7 +16,7 @@ class DrawService:
 
         self.gameFonts = []
         self.gameFonts.append(pg.font.Font("assets/fonts/ringfont.ttf", int(WIDTH / 25)))
-        self.gameFonts.append(pg.font.Font("assets/fonts/amaranth.otf", int(WIDTH / 25)))
+        self.gameFonts.append(pg.font.Font("assets/fonts/amaranth.otf", int(WIDTH / 40)))
         
         self.setScreen(WIDTH, HEIGHT, rangeNum)
 
@@ -28,7 +29,8 @@ class DrawService:
         self.BackgroundService.setRockColors(rangeNum)
         self.BackgroundService.changeShapeColors(selectedDice)
 
-    def deleteRocks(self, num):
+    def deleteRocks(self, num, handType):
+        self.allHands += f"{handType} : {num} | "
         rangeNum = self.BackgroundService.shapes[0].colorRange
         self.BackgroundService.deleteRocks(num)
         self.setBackground(rangeNum)
@@ -121,20 +123,23 @@ class DrawService:
         self.screen.blit(img, (x,y))
 
     def drawTextContent(self, LogicService, recentHandScore):
-        scoreStr = str(f"{LogicService.selectedTotal()} x {LogicService.hand.value[1]}")
+        scoreStr = str(f"{LogicService.selectedScoreTotal()} x {LogicService.hand.value[1]}")
 
         self.drawText(1, LogicService.hand.value[0], 5, 5)
         self.drawText(1, scoreStr, 5, self.HEIGHT/8)
-        if recentHandScore:
-            self.drawText(1, f"{recentHandScore}", 5, self.HEIGHT/8 * 2)
+
+        self.drawText(1, f"{recentHandScore}", 5, self.HEIGHT/8 * 2)
 
         rollsStr = str(f"{LogicService.rollsLeft} / {LogicService.STARTING_ROLLS} rolls")
+        handsStr = str(f"{LogicService.handsLeft} / {LogicService.STARTING_HANDS} hands")
         self.drawText(1, f"rocks left {self.NUM_SHAPES}", self.WIDTH / 6 * 2.2, 5)
-        self.drawText(1, rollsStr, self.WIDTH / 6 * 2.2,self.HEIGHT/10 * 3)
-        self.drawText(1, "Click die to select", 5,self.HEIGHT/10 * 7)
-        self.drawText(1, "Space to roll rice",  5,self.HEIGHT/10 * 8)
-        self.drawText(1, "Q to score hand",     5,self.HEIGHT/10 * 9)
 
+        self.drawText(1, f"{rollsStr}   |   {handsStr}", self.WIDTH / 4 * 1.2,self.HEIGHT/10 * 3)
+
+        self.drawText(1, f"{self.allHands}", 5,self.HEIGHT/10 * 6)
+        self.drawText(1, "Click die to select", 5,self.HEIGHT/10 * 7)
+        self.drawText(1, "Space to roll dice",  5,self.HEIGHT/10 * 8)
+        self.drawText(1, "Q to score hand",     5,self.HEIGHT/10 * 9)
 
     #draws pips onto face. Call after drawDieFace()
     def drawPips(self, x, y, pipGrid, d):

@@ -15,16 +15,19 @@ class DiceHand(Enum):
 
 class LogicService:
     STARTING_ROLLS = 3
+    STARTING_HANDS = 5
 
     def __init__(self, playerDice, DrawService):
         self.DrawService = DrawService
         self.rockHealth = DrawService.NUM_SHAPES
+
         self.hand = DiceHand.NO_HAND
         self.playerDice = playerDice
+        self.scoringHandDice = []
 
         self.rollsLeft = self.STARTING_ROLLS
+        self.handsLeft = self.STARTING_HANDS
 
-    #TODO SUBTRACTING WHOLE TOTAL, NOT NUM ******
     def subtractHealth(self, num):
         self.rockHealth -= num
         self.DrawService.NUM_SHAPES -= num
@@ -32,27 +35,27 @@ class LogicService:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
 
-    def selectedTotal(self):
-        scoreDice = self.getSelectedDice()
+    def selectedScoreTotal(self):
         total = 0
-        for die in scoreDice:
+        for die in self.scoringHandDice:
             total += die.calculate()
         return total
 
     def score(self):
-        if self.rockHealth > 0:
-            scoredHandNum = self.selectedTotal() * self.hand.value[1]
-            self.subtractHealth(scoredHandNum)
+        if self.rockHealth > 0 and self.scoringHandDice:
+            if self.handsLeft > 0:
+                self.handsLeft -= 1
+                scoredHandNum = self.selectedScoreTotal() * self.hand.value[1]
+                self.subtractHealth(scoredHandNum)
 
-            for die in self.getSelectedDice():
-                die.select()
-                die.rollDie()
+                for die in self.getSelectedDice():
+                    die.select()
+                    die.rollDie()
 
-            self.DrawService.deleteRocks(scoredHandNum)
-            self.rollsLeft = self.STARTING_ROLLS
-            return scoredHandNum
-        else:
-            return 0
+                self.DrawService.deleteRocks(scoredHandNum, self.hand.value[0])
+                self.rollsLeft = self.STARTING_ROLLS
+                self.scoringHandDice = []
+                return scoredHandNum
         
     def addDice(self):
         self.total = 0
@@ -81,27 +84,50 @@ class LogicService:
         values = list(count.values())
         uniqueVals = sorted(set(handDicePips))
         
-        # Define a helper to check for straights
+        # helper that checks for straights
         def is_straight(uniqueVals, length):
-            return any(all(x in uniqueVals for x in range(start, start + length)) for start in range(min(uniqueVals), max(uniqueVals) - length + 2))
+            for start in range(min(uniqueVals), max(uniqueVals) - length + 2):
+                if all(x in uniqueVals for x in range(start, start + length)):
+                    return range(start, start + length)
+            return None
         
+        #Hand calculations. Figures out the hand and then sets scoringHandDice depending on the hand
         if not handDicePips:
             self.hand = DiceHand.NO_HAND
+            self.scoringHandDice = []
         elif 5 in values:
             self.hand = DiceHand.FIVE_OF_A_KIND
+            target_value = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() == target_value]
         elif 4 in values:
             self.hand = DiceHand.FOUR_OF_A_KIND
+            target_value = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() == target_value]
         elif 3 in values and 2 in values:
             self.hand = DiceHand.FULL_HOUSE
+            three_kind = [k for k, v in count.items() if v == 3]
+            two_kind = [k for k, v in count.items() if v == 2]
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() in three_kind + two_kind]
         elif is_straight(uniqueVals, 5):
             self.hand = DiceHand.STRAIGHT_LARGE
+            straight = is_straight(uniqueVals, 5)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() in straight]
         elif is_straight(uniqueVals, 4):
             self.hand = DiceHand.STRAIGHT_SMALL
+            straight = is_straight(uniqueVals, 4)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() in straight]
         elif 3 in values:
             self.hand = DiceHand.THREE_OF_A_KIND
+            target_value = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() == target_value]
         elif values.count(2) == 2:
             self.hand = DiceHand.TWO_PAIR
+            pairs = [k for k, v in count.items() if v == 2]
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() in pairs]
         elif 2 in values:
             self.hand = DiceHand.ONE_PAIR
+            pair = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.playerDice if die.curSide.getNum() == pair]
         elif 1 in values:
             self.hand = DiceHand.HIGH_DIE
+            self.scoringHandDice = [max(self.getSelectedDice(), key=lambda die: die.curSide.getNum())]
