@@ -120,11 +120,20 @@ class DrawService:
         y = self.dieSide
         self.drawText(num, x, y)
 
-    def drawText(self, index, text, x, y, color = pg.Color(255,255,255)):
-        img = self.gameFonts[index].render(str(text), True, self.shadow)
-        self.screen.blit(img, (x+2,y+2))
-        img = self.gameFonts[index].render(str(text), True, color)
-        self.screen.blit(img, (x,y))
+    def drawText(self, index, msg, x, y, color = pg.Color(255,255,255), center = False):
+        if center:
+            text = self.gameFonts[index].render(str(msg), True, self.shadow)
+            rect = text.get_rect(center = (self.WIDTH//2 + 2 + x, self.HEIGHT//2 + 2 + y))
+            self.screen.blit(text, rect)
+
+            text = self.gameFonts[index].render(str(msg), True, color)
+            rect = text.get_rect(center = (self.WIDTH//2 + x, self.HEIGHT//2 + y))
+            self.screen.blit(text, rect)
+        else:
+            img = self.gameFonts[index].render(str(msg), True, self.shadow)
+            self.screen.blit(img, (x+2,y+2))
+            img = self.gameFonts[index].render(str(msg), True, color)
+            self.screen.blit(img, (x,y))
 
     def drawTextContent(self, LogicService):
         heightGrid = self.HEIGHT/10
@@ -133,23 +142,27 @@ class DrawService:
         marginX = widthGrid * .05
         marginY = heightGrid * .05
 
-        scoreStr = str(f"{LogicService.hand.value[1]} x {LogicService.selectedScoreTotal()}")
+        scoreStr = str(f"{LogicService.selectedScoreTotal()} x {LogicService.hand.value[1]}")
 
-        self.drawText(0, LogicService.hand.value[0], widthGrid * 3.5, marginY)
-        self.drawText(0, scoreStr,                   widthGrid * 7, marginY)
+        #current hand
+        self.drawText(0, LogicService.hand.value[0], 0,-heightGrid * 1.5, center=True)
+        self.drawText(0, scoreStr, 0,-heightGrid * .75, center=True)
 
         # if self.allHands:
         #     self.drawText(1, f"{self.allHands[-1]}", widthGrid * 4.25, marginY)
 
+        #game info
         self.drawText(1,f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", marginX,marginY)
         self.drawText(1,f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", marginX,heightGrid * .5 + marginY)
         self.drawText(1,f"{self.NUM_SHAPES} rocks",                                      marginX,heightGrid + marginY)
 
+        #previous hands
         yNum = 9.5
         for strHand in self.allHands:
             self.drawText(1, f"{strHand}",      marginX, heightGrid * yNum - marginY)
             yNum -= .5
-            
+        
+        #controls
         self.drawText(1, f"select : click", widthGrid * 8 + marginX * 2, heightGrid * 8   - marginY)
         self.drawText(1, f"  roll : space", widthGrid * 8 + marginX * 2, heightGrid * 8.5 - marginY)
         self.drawText(1, f" score : Q key", widthGrid * 8 + marginX * 2, heightGrid * 9   - marginY)
