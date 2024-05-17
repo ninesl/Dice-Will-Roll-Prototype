@@ -14,9 +14,10 @@ pg.display.set_icon(window_icon)
 
 
 clock = pg.time.Clock()
+monitor = pg.display.Info()
 
-WIDTH =  1920
-HEIGHT = 1080
+WIDTH =  int(monitor.current_w)
+HEIGHT = int(monitor.current_h)
 
 playerDice = []
 rangeMin, rangeMax = 0,255
@@ -37,11 +38,11 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
 
 
-BACKGROUND_COLOR_RANGE = 100
-
+BACKGROUND_COLOR_RANGE = 85
+STARTING_ROCKS = 200
 SoundService = sounds.SoundService()
 
-DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES = 250, rangeNum=BACKGROUND_COLOR_RANGE)
+DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
 AnimateService = animate.AnimateService(DrawService)
 
 EventService = events.EventService()

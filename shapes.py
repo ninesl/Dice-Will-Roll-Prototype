@@ -34,9 +34,13 @@ class Background:
             shape.yBack = not shape.yBack
 
     # going 'deeper' by the level...
-    def setRockColors(self, num):
-        for shape in self.shapes:
-            shape.setFullColor(num)
+    def setRockColors(self, num, otherShapes = None):
+        if not otherShapes:
+            for shape in self.shapes:
+                shape.setFullColor(num)
+        else:
+            for shape in otherShapes:
+                shape.setFullColor(5)
 
     #returns the new shapes to change so they can be removed later
     def addChangingShapes(self, selectedDie):
@@ -54,8 +58,20 @@ class Background:
 
         self.changingShapesArray.append(newShapes)
 
-    def deleteRocks(self):
+    def deleteRocks(self, numRocks):
+        # shapesDeleting = []
+        if numRocks > len(self.shapes):
+            numRocks = len(self.shapes)
+
+        rocksDeleted = random.sample(self.shapes, numRocks)
+        self.setRockColors(5, rocksDeleted)
+
         self.changingShapesArray = []
+
+        for shape in rocksDeleted:
+            # shape.setTargetColor(pg.Color(255,255,255,255))
+            self.shapes.remove(shape)
+
         for shape in self.shapes:
             shape.setFullColor(shape.colorRange)
 
@@ -67,7 +83,7 @@ class Background:
         self.changingShapesArray.remove(removedShapes)
 
     def changeShapeColors(self, selectedDice, selectedDie = None):
-        if not selectedDie:
+        if not selectedDie or not self.shapes:
             return
         
         #selectedColors = [die.curSide.color for die in selectedDice]
@@ -100,9 +116,7 @@ class Shape:
         self.yBack = random.choice([True, False])
 
     def setFullColor(self, colorRange):
-        self.transitionProgress = 0.0
         self.colorRange = colorRange
-        self.targetColor = self.color
         self.setTargetColor(randomColor(self.colorRange))
 
     def draw(self, screen):
@@ -144,9 +158,9 @@ class Shape:
     
     def setTargetColor(self, targetColor):
         #should avoid redundant assignments
-        if self.targetColor != targetColor:
-            self.targetColor = targetColor
-            self.transitionProgress = 0.0  # Reset transition progress
+        # if self.targetColor != targetColor:
+        self.targetColor = targetColor
+        self.transitionProgress = 0.0  # Reset transition progress
 
     def updateColor(self, transIncr = .001):
         if self.transitionProgress <= 1.0:
@@ -154,7 +168,8 @@ class Shape:
             r = int(self.color.r + (self.targetColor.r - self.color.r) * self.transitionProgress)
             g = int(self.color.g + (self.targetColor.g - self.color.g) * self.transitionProgress)
             b = int(self.color.b + (self.targetColor.b - self.color.b) * self.transitionProgress)
-            self.color = pg.Color(r, g, b)
+            a = int(self.color.a + (self.targetColor.a - self.color.a) * self.transitionProgress)
+            self.color = pg.Color(r, g, b, a)
 
 def randomColor(midRange):
     # Maintain the range for visual feedback while ensuring consistent transition speed

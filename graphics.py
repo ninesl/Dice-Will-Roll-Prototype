@@ -34,12 +34,13 @@ class DrawService:
     def deleteRocks(self, num, handType):
         self.allHands.append(f"{num} : {handType}")
         # rangeNum = self.BackgroundService.shapes[0].colorRange
-        self.BackgroundService.deleteRocks()
+        self.BackgroundService.deleteRocks(num)
         # self.setBackground(rangeNum)
 
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
         # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
-        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
+        # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
 
