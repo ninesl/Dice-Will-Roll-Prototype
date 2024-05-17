@@ -5,7 +5,7 @@ class AnimateService:
     def __init__(self, DrawService):
         self.DrawService = DrawService
 
-    def shakeDice(self, playerDice):
+    def shakeDice(self, playerDice, selected = False):
         oldDiceX = self.DrawService.diceX
         oldDiceY = self.DrawService.diceY
 
@@ -16,13 +16,12 @@ class AnimateService:
         # self.DrawService.drawDice(dieToKeep)
 
         # self.DrawService.diceY += int(self.DrawService.dieSide * 1.5)
-
         y = self.DrawService.diceY
         for _ in range(shake_duration):
             x = self.DrawService.diceX
             for die in playerDice:
-                if not die.isSelected:
-                    die.rollDie()
+                if not die.isSelected and not selected or die.isSelected and selected:
+                    # die.rollDie()
                     pixelShakeX = random.randint(-max_shake_range, max_shake_range)
                     pixelShakeY = random.randint(-max_shake_range, max_shake_range)
                     # Temporarily update dice positions
