@@ -3,22 +3,50 @@ from enum import Enum
 
 class DiceHand(Enum):
     NO_HAND         = ["No Hand",        0]
-    ONE_PAIR        = ["One Pair",       1]
-    TWO_PAIR        = ["Two Pair",       2]
-    THREE_OF_A_KIND = ["Three of a Kind",3]
-    STRAIGHT_SMALL  = ["Small Straight", 4]
-    STRAIGHT_LARGE  = ["Large Straight", 5]
-    FULL_HOUSE      = ["Full House",     6]
-    FOUR_OF_A_KIND  = ["Four of a Kind", 7]
-    FIVE_OF_A_KIND  = ["Five of a Kind", 8]
     HIGH_DIE        = ["High Die",       1]
+    ONE_PAIR        = ["One Pair",       1]
+    TWO_PAIR        = ["Two Pair",       1]
+    THREE_OF_A_KIND = ["Three of a Kind",2]
+    STRAIGHT_SMALL  = ["Small Straight", 3]
+    STRAIGHT_LARGE  = ["Large Straight", 3]
+    FULL_HOUSE      = ["Full House",     5]
+    FOUR_OF_A_KIND  = ["Four of a Kind", 10]
+    FIVE_OF_A_KIND  = ["Five of a Kind", 15]
 
 class LogicService:
-    def __init__(self, playerDice):
-        self.total = 0
+    def __init__(self, playerDice, DrawService):
+        self.DrawService = DrawService
+        self.rockHealth = DrawService.NUM_SHAPES
         self.hand = DiceHand.NO_HAND
         self.playerDice = playerDice
 
+
+    #TODO SUBTRACTING WHOLE TOTAL, NOT NUM ******
+    def subtractHealth(self, num):
+        self.rockHealth -= num
+        self.DrawService.NUM_SHAPES -= num
+        if self.rockHealth <= 0:
+            self.rockHealth = 0
+            self.DrawService.NUM_SHAPES = 0
+            return False
+        return True
+
+    def selectedTotal(self):
+        scoreDice = self.getSelectedDice()
+        total = 0
+        for die in scoreDice:
+            total += die.calculate()
+        return total
+
+    def score(self):
+        scoredHandNum = self.selectedTotal() * self.hand.value[1]
+        self.DrawService.deleteRocks(scoredHandNum)
+        for die in self.getSelectedDice():
+            die.select()
+            die.rollDie()
+        self.subtractHealth(scoredHandNum)
+        return scoredHandNum
+        
     def addDice(self):
         self.total = 0
         for die in self.playerDice:
@@ -26,11 +54,8 @@ class LogicService:
                 self.total += die.num
     
     def rollDice(self):
-        self.total = 0
         for die in self.playerDice:
-            if die.isSelected:
-                self.total += die.num
-            else:
+            if not die.isSelected:
                 die.rollDie()
 
     def getSelectedDice(self):
