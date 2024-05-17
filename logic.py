@@ -28,8 +28,6 @@ class LogicService:
         if self.rockHealth <= 0:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
-            return False
-        return True
 
     def selectedTotal(self):
         scoreDice = self.getSelectedDice()
@@ -39,13 +37,18 @@ class LogicService:
         return total
 
     def score(self):
-        scoredHandNum = self.selectedTotal() * self.hand.value[1]
-        self.DrawService.deleteRocks(scoredHandNum)
-        for die in self.getSelectedDice():
-            die.select()
-            die.rollDie()
-        self.subtractHealth(scoredHandNum)
-        return scoredHandNum
+        if self.rockHealth > 0:
+            scoredHandNum = self.selectedTotal() * self.hand.value[1]
+            self.subtractHealth(scoredHandNum)
+
+            for die in self.getSelectedDice():
+                die.select()
+                die.rollDie()
+
+            self.DrawService.deleteRocks(scoredHandNum)
+            return scoredHandNum
+        else:
+            return 0
         
     def addDice(self):
         self.total = 0

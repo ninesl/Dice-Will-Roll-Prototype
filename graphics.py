@@ -15,26 +15,32 @@ class DrawService:
         
         self.setScreen(WIDTH, HEIGHT, rangeNum)
 
-
-        # self.screenColor = self.transparent
-        
-        # self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+    def setBackground(self, rangeNum):
+        self.BackgroundService = shapes.Background(self.WIDTH, self.HEIGHT, NUM_SHAPES=self.NUM_SHAPES, colorRangeNum=rangeNum, oneXthOfRocks=6)
+        self.setBackgroundColors(rangeNum)
 
     def setBackgroundColors(self, rangeNum, selectedDice = []):
-        self.screenColor = shapes.randomColor(rangeNum)
+        self.screenColor = shapes.randomColor(rangeNum - 10)
         self.BackgroundService.setRockColors(rangeNum)
         self.BackgroundService.changeShapeColors(selectedDice)
+
+    def deleteRocks(self, num):
+        rangeNum = self.BackgroundService.shapes[0].colorRange
+        self.BackgroundService.deleteRocks(num)
+        self.setBackground(rangeNum)
 
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
 
+        self.WIDTH = WIDTH
+        self.HEIGHT = HEIGHT
+
         self.diceX = int(self.dieSide * self.gridWidth / 2.5) #starting row of dice
         self.diceY = self.dieSide
 
-        self.BackgroundService = shapes.Background(WIDTH, HEIGHT, NUM_SHAPES=self.NUM_SHAPES, colorRangeNum=rangeNum, oneXthOfRocks=6)
-        self.setBackgroundColors(rangeNum)
+        self.setBackground(rangeNum)
 
         self.gameFont = pg.font.Font("assets/ringfont.ttf", int(WIDTH / 25))
 

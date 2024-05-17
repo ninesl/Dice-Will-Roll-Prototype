@@ -38,6 +38,9 @@ class Die:
         else:
             self.curSide.color.a = 255 #set to opaque
         return self.curSide.color
+    
+    def calculate(self):
+        return self.curSide.getCalculate()
 
 class Side:
     def __init__(self, value, color):

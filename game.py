@@ -39,14 +39,14 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
 
-EventService = events.EventService()
-LogicService = logic.LogicService(playerDice)
 
 BACKGROUND_COLOR_RANGE = 100
 
-DrawService = graphics.DrawService(WIDTH, HEIGHT, rangeNum=BACKGROUND_COLOR_RANGE)
+DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES = 100, rangeNum=BACKGROUND_COLOR_RANGE)
 AnimateService = animate.AnimateService(DrawService)
 
+EventService = events.EventService()
+LogicService = logic.LogicService(playerDice, DrawService)
 
 total = 0
 for die in playerDice:
@@ -55,12 +55,17 @@ for die in playerDice:
 going = True
 #TODO FPS math?
 
+recentHandScore = None
+
 while going:
+
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
         elif event.type == pg.VIDEORESIZE:
-            DrawService.setScreen(event.w, event.h)
+            WIDTH = event.w
+            HEIGHT = event.h
+            DrawService.setScreen(WIDTH, HEIGHT)
             LogicService.unselectAll()
 
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -70,42 +75,54 @@ while going:
             DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice(), d)
 
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_SPACE:
-                # DrawService.BackgroundService.changeDirection()
-                AnimateService.shakeDice(playerDice)
-                LogicService.rollDice()
-            #left and right arrow keys change background color
-            elif event.key == pg.K_LEFT:
-                BACKGROUND_COLOR_RANGE -= 15
-                if BACKGROUND_COLOR_RANGE < 5:
-                    BACKGROUND_COLOR_RANGE = 5
-                else:
-                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
-                    LogicService.unselectAll()
-            elif event.key == pg.K_RIGHT:
-                BACKGROUND_COLOR_RANGE += 15
-                if BACKGROUND_COLOR_RANGE > 250:
-                    BACKGROUND_COLOR_RANGE = 250
-                else:
-                    DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.getSelectedDice())
-                    LogicService.unselectAll()
-            elif event.key == pg.K_ESCAPE:
-                going = False
+            match event.key:
+                case pg.K_SPACE:
+                    # DrawService.BackgroundService.changeDirection()
+                    AnimateService.shakeDice(playerDice)
+                    LogicService.rollDice()
+                #Scoring a hand
+                case pg.K_q:
+                    recentHandScore = LogicService.score()
+                        
+                    #roll selected die
+                #left and right arrow keys change background color
+                # case pg.K_LEFT:
+                #     BACKGROUND_COLOR_RANGE -= 15
+                #     if BACKGROUND_COLOR_RANGE < 5:
+                #         BACKGROUND_COLOR_RANGE = 5
+                #     else:
+                #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.   getSelectedDice())
+                #         LogicService.unselectAll()
+                # case pg.K_RIGHT:
+                #     BACKGROUND_COLOR_RANGE += 15
+                #     if BACKGROUND_COLOR_RANGE > 250:
+                #         BACKGROUND_COLOR_RANGE = 250
+                #     else:
+                #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,LogicService.getSelectedDice())
+                #         LogicService.unselectAll()
+                case pg.K_ESCAPE:
+                    going = False
 
     DrawService.resetFrame()
-
     #returns list of (die, rect) for EventService
     diceAndRect = DrawService.drawDice(playerDice)
 
     LogicService.findHand()
 
-    DrawService.drawText(BACKGROUND_COLOR_RANGE, 2,HEIGHT / 10)
-    DrawService.drawValue(LogicService.hand.value[0])
+    scoreStr = str(f"{LogicService.selectedTotal()} x {LogicService.hand.value[1]}")
+
+    DrawService.drawText(LogicService.hand.value[0], 5,0)
+    DrawService.drawText(scoreStr, 5,HEIGHT/8)
+    if recentHandScore:
+        DrawService.drawText(f"{recentHandScore}", 5, HEIGHT/8 * 2)
+
                 
     EventService.dieHovered(diceAndRect)
 
     fps = int(clock.get_fps())
-    DrawService.drawText(f"fps   {fps}", 2,HEIGHT / 10 * 2)
+    DrawService.drawText(f"fps {fps}", WIDTH / 8 * 7,0 )
+
+    DrawService.drawText(f"rocks left {DrawService.NUM_SHAPES}", WIDTH / 8 * 5,HEIGHT/8 * 7 )
 
     pg.display.update()
     clock.tick(60)
