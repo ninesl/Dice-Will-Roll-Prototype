@@ -106,7 +106,7 @@ while going:
 
     
     fps = int(clock.get_fps())
-    DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
+    DrawService.drawText(1, f"{fps} fps", WIDTH/10 * 9.25 - WIDTH/10 * .05, HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
 
