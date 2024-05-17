@@ -11,9 +11,9 @@ pg.display.set_caption("Dwarf Dice")
 window_icon = pg.image.load("assets/pickaxe.png")
 pg.display.set_icon(window_icon)
 
-# music = pg.mixer.Sound("assets/audio/theme.mp3")
-# music.play(-1)
-# music.set_volume(.3)
+music = pg.mixer.Sound("assets/audio/theme.mp3")
+music.play(-1)
+music.set_volume(.3)
 
 
 clock = pg.time.Clock()
@@ -40,9 +40,9 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
 
 
-BACKGROUND_COLOR_RANGE = 100
+BACKGROUND_COLOR_RANGE = 150
 
-DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES = 100, rangeNum=BACKGROUND_COLOR_RANGE)
+DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES = 250, rangeNum=BACKGROUND_COLOR_RANGE)
 AnimateService = animate.AnimateService(DrawService)
 
 EventService = events.EventService()
@@ -65,7 +65,7 @@ while going:
         elif event.type == pg.VIDEORESIZE:
             WIDTH = event.w
             HEIGHT = event.h
-            DrawService.setScreen(WIDTH, HEIGHT)
+            DrawService.setScreen(WIDTH, HEIGHT, BACKGROUND_COLOR_RANGE)
             LogicService.unselectAll()
 
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -107,22 +107,14 @@ while going:
     #returns list of (die, rect) for EventService
     diceAndRect = DrawService.drawDice(playerDice)
 
-    LogicService.findHand()
-
-    scoreStr = str(f"{LogicService.selectedTotal()} x {LogicService.hand.value[1]}")
-
-    DrawService.drawText(LogicService.hand.value[0], 5,0)
-    DrawService.drawText(scoreStr, 5,HEIGHT/8)
-    if recentHandScore:
-        DrawService.drawText(f"{recentHandScore}", 5, HEIGHT/8 * 2)
-
-                
     EventService.dieHovered(diceAndRect)
 
+    LogicService.findHand()
+
+    DrawService.drawTextContent(LogicService, recentHandScore)
+
+    
     fps = int(clock.get_fps())
-    DrawService.drawText(f"fps {fps}", WIDTH / 8 * 7,0 )
-
-    DrawService.drawText(f"rocks left {DrawService.NUM_SHAPES}", WIDTH / 8 * 5,HEIGHT/8 * 7 )
-
+    DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
     pg.display.update()
     clock.tick(60)

@@ -14,12 +14,15 @@ class DiceHand(Enum):
     FIVE_OF_A_KIND  = ["Five of a Kind", 15]
 
 class LogicService:
+    STARTING_ROLLS = 3
+
     def __init__(self, playerDice, DrawService):
         self.DrawService = DrawService
         self.rockHealth = DrawService.NUM_SHAPES
         self.hand = DiceHand.NO_HAND
         self.playerDice = playerDice
 
+        self.rollsLeft = self.STARTING_ROLLS
 
     #TODO SUBTRACTING WHOLE TOTAL, NOT NUM ******
     def subtractHealth(self, num):
@@ -46,6 +49,7 @@ class LogicService:
                 die.rollDie()
 
             self.DrawService.deleteRocks(scoredHandNum)
+            self.rollsLeft = self.STARTING_ROLLS
             return scoredHandNum
         else:
             return 0
@@ -57,9 +61,11 @@ class LogicService:
                 self.total += die.num
     
     def rollDice(self):
-        for die in self.playerDice:
-            if not die.isSelected:
-                die.rollDie()
+        if self.rollsLeft > 0:
+            for die in self.playerDice:
+                if not die.isSelected:
+                    die.rollDie()
+            self.rollsLeft -= 1
 
     def getSelectedDice(self):
         return [die for die in self.playerDice if die.isSelected]
@@ -69,11 +75,6 @@ class LogicService:
             die.select()
 
     def findHand(self):
-        # handDicePips = []
-        # for die in playerDice:
-        #     if die.isSelected:
-        #         handDicePips.append(die.curSide.getPips())
-        
         handDicePips = [die.curSide.getNum() for die in self.playerDice if die.isSelected]
 
         count = Counter(handDicePips)
@@ -104,14 +105,3 @@ class LogicService:
             self.hand = DiceHand.ONE_PAIR
         elif 1 in values:
             self.hand = DiceHand.HIGH_DIE
-        
-        
-
-        
-
-        
-
-        
-        
-
-        
