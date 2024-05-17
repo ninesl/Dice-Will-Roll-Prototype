@@ -54,14 +54,10 @@ class Background:
 
         self.changingShapesArray.append(newShapes)
 
-    def deleteRocks(self, num):
-        for row in self.changingShapesArray:
-            self.removeChangingShapes(row) #to reset colors and remove die flags
-        
-        # deletingRocks = random.sample(self.shapes, num)
-        # for rock in deletingRocks:
-        #     self.shapes.remove(rock)
-        # return self.shapes[0].colorRange
+    def deleteRocks(self):
+        self.changingShapesArray = []
+        for shape in self.shapes:
+            shape.setFullColor(shape.colorRange)
 
     #takes list of shapes to remove, gotten from addChangingShapes()
     def removeChangingShapes(self, removedShapes):

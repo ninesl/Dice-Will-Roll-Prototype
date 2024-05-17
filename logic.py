@@ -53,6 +53,7 @@ class LogicService:
                     die.rollDie()
 
                 self.DrawService.deleteRocks(scoredHandNum, self.hand.value[0])
+                
                 self.rollsLeft = self.STARTING_ROLLS
                 self.scoringHandDice = []
                 return scoredHandNum

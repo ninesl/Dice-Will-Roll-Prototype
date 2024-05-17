@@ -112,10 +112,10 @@ while going:
 
     LogicService.findHand()
 
-    DrawService.drawTextContent(LogicService, recentHandScore)
+    DrawService.drawTextContent(LogicService)
 
     
-    fps = int(clock.get_fps())
-    DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
+    # fps = int(clock.get_fps())
+    # DrawService.drawText(1, f"fps {fps}", WIDTH / 8 * 7, 5)
     pg.display.update()
     clock.tick(60)
