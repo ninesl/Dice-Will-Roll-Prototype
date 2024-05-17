@@ -10,7 +10,7 @@ class Background:
 
         #makes NUM_SHAPES to use with speed (.5)
         self.shapes = [self.newShape(.2, colorRangeNum) for _ in range(NUM_SHAPES)]
-
+        self.oneXthOfRocks = oneXthOfRocks
         #rocks that change colors
         self.numShapesToChange = len(self.shapes) // oneXthOfRocks
         self.changingShapesArray = []
@@ -45,7 +45,7 @@ class Background:
     #returns the new shapes to change so they can be removed later
     def addChangingShapes(self, selectedDie):
         #newShapes are the shapes being added to be accessed later
-        newShapes = random.sample(self.shapes, self.numShapesToChange)
+        newShapes = random.sample(self.shapes, len(self.shapes) // self.oneXthOfRocks)
         #changingShapes is the full list of shapes
         self.changingShapes.extend(newShapes)
 

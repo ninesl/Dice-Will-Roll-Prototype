@@ -13,6 +13,7 @@ class DrawService:
         self.gridWidth = 14
         self.shadowLength = int(WIDTH / 400)
         self.NUM_SHAPES = NUM_SHAPES
+        self.allHands = []
 
         self.gameFonts = []
         self.gameFonts.append(pg.font.Font("assets/fonts/ringfont.ttf", int(WIDTH / 25)))
