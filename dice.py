@@ -83,7 +83,10 @@ class Pip:
         return self.gem.value
 
 class Mod(Enum):
+    # ATK = pg.Color(255,0,0,230)
+    # DEF = pg.Color(0,100,255,230)
+    # GOLD = pg.Color(255,215,0,230)
     BASE = pg.Color(0,0,0,230)
-    ATK = pg.Color(255,0,0,230)
-    DEF = pg.Color(0,100,255,230)
-    GOLD = pg.Color(255,215,0,230)
+    ATK  = pg.Color(0,0,0,230)
+    DEF  = pg.Color(0,0,0,230)
+    GOLD = pg.Color(0,0,0,230)

@@ -174,4 +174,4 @@ class Shape:
 def randomColor(midRange):
     # Maintain the range for visual feedback while ensuring consistent transition speed
     num = random.randint(midRange - 5, midRange + 5)
-    return pg.Color(num, num, num)
+    return pg.Color(num, num, num, 255)

@@ -38,15 +38,16 @@ playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax),
                                        rand.randint(rangeMin, rangeMax))))
 
 
-BACKGROUND_COLOR_RANGE = 85
+BACKGROUND_COLOR_RANGE = 150
 STARTING_ROCKS = 200
 SoundService = sounds.SoundService()
 
+
 DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
 AnimateService = animate.AnimateService(DrawService)
-
 EventService = events.EventService()
 LogicService = logic.LogicService(playerDice, DrawService)
+
 
 SoundService.playMusic()
 
@@ -94,6 +95,20 @@ while going:
                     SoundService.hitSound(recentHandScore)
                 case pg.K_ESCAPE:
                     going = False
+                case pg.K_p:
+                    DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
+                    AnimateService = animate.AnimateService(DrawService)
+                    EventService = events.EventService()
+                    LogicService = logic.LogicService(playerDice, DrawService)
+                case pg.K_o:
+                    BACKGROUND_COLOR_RANGE -= rand.randint(15,25)
+                    if BACKGROUND_COLOR_RANGE <= 15:
+                        BACKGROUND_COLOR_RANGE = 15
+                    STARTING_ROCKS += 50
+                    DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
+                    AnimateService = animate.AnimateService(DrawService)
+                    EventService = events.EventService()
+                    LogicService = logic.LogicService(playerDice, DrawService)
 
     DrawService.resetFrame()
     #returns list of (die, rect) for EventService

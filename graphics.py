@@ -163,10 +163,16 @@ class DrawService:
             yNum -= .5
         
         #controls
-        self.drawText(1, f"select : click", widthGrid * 8 + marginX * 2, heightGrid * 8   - marginY)
-        self.drawText(1, f"  roll : space", widthGrid * 8 + marginX * 2, heightGrid * 8.5 - marginY)
-        self.drawText(1, f" score : Q key", widthGrid * 8 + marginX * 2, heightGrid * 9   - marginY)
-        self.drawText(1, f"  quit :   esc", widthGrid * 8 + marginX * 2, heightGrid * 9.5 - marginY)
+        controlText = ["select : click", 
+                       "  roll : space", 
+                       " score : Q key", 
+                       " reset : P key",
+                       "harder : O key", 
+                       "  quit :   esc"]
+        heightModifier = 7
+        for controlT in controlText:
+            self.drawText(1, controlT, widthGrid * 8 + marginX * 2, heightGrid * heightModifier - marginY)
+            heightModifier += .5
 
     #draws pips onto face. Call after drawDieFace()
     def drawPips(self, x, y, pipGrid, d):
