@@ -96,11 +96,15 @@ while going:
                 case pg.K_ESCAPE:
                     going = False
                 case pg.K_p:
+                    LogicService.unselectAll()
+                    LogicService.rollDice()
                     DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
                     AnimateService = animate.AnimateService(DrawService)
                     EventService = events.EventService()
                     LogicService = logic.LogicService(playerDice, DrawService)
                 case pg.K_o:
+                    LogicService.unselectAll()
+                    LogicService.rollDice()
                     BACKGROUND_COLOR_RANGE -= rand.randint(15,25)
                     if BACKGROUND_COLOR_RANGE <= 15:
                         BACKGROUND_COLOR_RANGE = 15
