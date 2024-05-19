@@ -51,8 +51,18 @@ class Side:
             self.pips.append(Pip())
     
     def getCalculate(self):
-        #todo pip calculations
-        return len(self.pips)
+        score = 0
+        for pip in self.pips:
+            match pip.gem:
+                case Mod.ATK:
+                    score += 2
+                # case Mod.DEF:
+                #     break
+                # case Mod.GOLD:
+                #     break
+                case Mod.BASE:
+                    score += 1
+        return score
     
     def getPips(self):
         #todo return pips for gem in DrawService graphics.py
@@ -68,25 +78,26 @@ class Side:
 class Pip:
     def __init__(self):
         self.gem = Mod.BASE
-        match random.randint(0,4):
+        match random.randint(0,2):
             case 0:
                 self.gem = Mod.BASE
             case 1:
                 self.gem = Mod.ATK
-            case 2:
-                self.gem = Mod.DEF
-            case 3:
-                self.gem = Mod.GOLD
+            # case 2:
+            #     self.gem = Mod.DEF
+            # case 3:
+            #     self.gem = Mod.GOLD
 
 
     def getPipColor(self):
         return self.gem.value
 
 class Mod(Enum):
-    # ATK = pg.Color(255,0,0,230)
+    ATK = pg.Color(255,0,0,230)
     # DEF = pg.Color(0,100,255,230)
     # GOLD = pg.Color(255,215,0,230)
     BASE = pg.Color(0,0,0,230)
-    ATK  = pg.Color(0,0,0,230)
-    DEF  = pg.Color(0,0,0,230)
-    GOLD = pg.Color(0,0,0,230)
+    # ATK  = pg.Color(0,0,0,230)
+
+    # DEF  = pg.Color(0,0,0,230)
+    # GOLD = pg.Color(0,0,0,230)
