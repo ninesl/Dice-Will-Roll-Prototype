@@ -43,8 +43,8 @@ class DrawService:
         # self.setBackground(rangeNum)
 
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
-        # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
-        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
+        # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
         # self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
@@ -164,7 +164,7 @@ class DrawService:
         #previous hands
         yNum = 9.5
         for strHand in self.allHands:
-            self.drawText(1, f"{strHand}",      marginX, heightGrid * yNum - marginY)
+            self.drawText(1, f"{strHand}", marginX, heightGrid * yNum - marginY)
             yNum -= .5
         
         #controls
