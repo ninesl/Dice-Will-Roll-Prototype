@@ -1,6 +1,6 @@
 import pygame as pg
-import random as rand
 import gamecontroller
+from enum import Enum
 
 pg.init()
 pg.display.set_caption("Dwarf Dice")
@@ -16,48 +16,81 @@ HEIGHT = int(monitor.current_h * 3 / 4)
 
 gc = gamecontroller.GameController(monitor)
 
-going = True
-#TODO FPS math?
-
-print("⚀⚁⚂ DWARF ⚃⚄⚅")
-print("⚀⚁⚂  DICE ⚃⚄⚅")
+# class Controls(Enum):
+#     ROLL  = gc.rollDice,
+#     SELECT= gc.selectDie,
+#     QUIT  = gc.quitGame,
+#     SCORE = gc.scoreDice,
+#     RESET = gc.resetLevel,
+#     HARDER= gc.harderLevel
 
 keyBinds = {
-    
+    pg.K_SPACE: "roll",
+    1: "select",
+    pg.K_ESCAPE: "quit",
+    pg.K_q: "score",
+    pg.K_p: "reset",
+    pg.K_o: "harder"
 }
 
-print("loading", end = "...")
+controls = {
+    "roll"  :gc.rollDice,
+    "select":gc.selectDie,
+    "quit"  :gc.quitGame,
+    "score" :gc.scoreDice,
+    "reset" :gc.resetLevel,
+    "harder":gc.harderLevel
+}
+
+print("loading", end = ".")
 while not gc.isFinishedLoading():
     print(".", end = "")
+print("done")
+print()
 
-while going:
+print(" ⚀ ⚁ ⚂ ⚃ ⚄ ⚅")
+print("⚀⚁⚂ DWARF ⚃⚄⚅")
+print("⚀⚁⚂  DICE ⚃⚄⚅")
+print(" ⚀ ⚁ ⚂ ⚃ ⚄ ⚅")
 
+def replaceKeyBind(oldKey, newKey):
+    # print(chr(oldKey))
+    # print(chr(newKey))
+    global keyBinds
+    if oldKey in keyBinds:
+        action = keyBinds.pop(oldKey)
+        keyBinds[newKey] = action
+    
+# Example of updating key bindings
+# Change roll action from space key to 'r' key
+# replaceKeyBind(pg.K_SPACE, pg.K_r)
+
+# fpsCount = 1
+while gc.GOING:
     for event in pg.event.get():
-        if event.type == pg.QUIT:
-            going = False
-        elif event.type == pg.VIDEORESIZE:
-            gc.resizeScreen(event.w, event.h)
+        try:
+            if event.type == pg.QUIT:
+                gc.quitGame()
+            elif event.type == pg.VIDEORESIZE:
+                gc.resizeScreen(event.w, event.h)
 
-        if event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1: #left mouse button
-                gc.selectDie()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                controls[keyBinds[event.button]]()
 
-        if event.type == pg.KEYDOWN:
-            match event.key:
-                case pg.K_SPACE:
-                    gc.rollDice()
-                case pg.K_q:
-                    gc.scoreDice()
-                case pg.K_ESCAPE:
-                    going = False
-                case pg.K_p:
-                    gc.resetLevel()
-                case pg.K_o:
-                    gc.harderLevel()
+            if event.type == pg.KEYDOWN:
+                controls[keyBinds[event.key]]()
+        except KeyError:
+            pass  # Explicitly doing nothing
 
     gc.levelLoop()
 
     fps = int(clock.get_fps())
-    gc.DrawService.drawText(1, f"{fps} fps", WIDTH/10 * 9.25 - WIDTH/10 * .05, HEIGHT/10 * .05)
+    gc.DrawService.drawText(1, f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
+    
+    # fpsCount += 1
+    # if fpsCount >= 120:
+    #     print(f"gc.LogicService.rockHealth : {gc.LogicService.rockHealth}")
+    #     print(f"gc.DrawService.NUM_SHAPES  : {gc.DrawService.NUM_SHAPES}")
+    #     fpsCount = 0

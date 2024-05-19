@@ -10,6 +10,7 @@ import animate
 class GameController:
     BACKGROUND_COLOR_RANGE = 150
     STARTING_ROCKS = 200
+    GOING = True
 
     def __init__(self, monitor):
         self.monitor = monitor
@@ -25,12 +26,16 @@ class GameController:
 
         self.SoundService.playMusic()
 
+    def quitGame(self):
+        self.GOING = False
+
     def resizeScreen(self, eventW, eventH):
         self.WIDTH = eventW
         self.HEIGHT = eventH
+        self.LogicService.unselectAll()
         
         self.DrawService = graphics.DrawService(self.WIDTH, self.HEIGHT, NUM_SHAPES=self.LogicService.rockHealth, rangeNum=self.BACKGROUND_COLOR_RANGE)
-        # self.LogicService.unselectAll()
+        self.AnimateService = animate.AnimateService(self.DrawService)
 
     def isFinishedLoading(self):
         return self.DrawService and self.AnimateService and self.EventService and self.LogicService and self.SoundService
