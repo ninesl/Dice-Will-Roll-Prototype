@@ -35,6 +35,13 @@ class LogicService:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
 
+    def selectedScoreString(self):
+        pipChars = "⚀⚁⚂⚃⚄⚅"
+        handVals = ""
+        for die in self.scoringHandDice:
+            handVals += f"{pipChars[die.curSide.getNum() - 1]} "
+        return handVals.strip()
+
     def selectedScoreTotal(self):
         total = 0
         for die in self.scoringHandDice:
