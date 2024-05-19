@@ -1,11 +1,6 @@
 import pygame as pg
 import random as rand
-import dice
-import graphics
-import events
-import logic
-import sounds
-import animate
+import gamecontroller
 
 pg.init()
 pg.display.set_caption("Dwarf Dice")
@@ -19,114 +14,50 @@ monitor = pg.display.Info()
 WIDTH =  int(monitor.current_w * 3 / 4)
 HEIGHT = int(monitor.current_h * 3 / 4)
 
-playerDice = []
-rangeMin, rangeMax = 0,255
-playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                       rand.randint(rangeMin, rangeMax),
-                                       rand.randint(rangeMin, rangeMax))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                       rand.randint(rangeMin, rangeMax),
-                                       rand.randint(rangeMin, rangeMax))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                       rand.randint(rangeMin, rangeMax),
-                                       rand.randint(rangeMin, rangeMax))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                       rand.randint(rangeMin, rangeMax),
-                                       rand.randint(rangeMin, rangeMax))))
-playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                       rand.randint(rangeMin, rangeMax),
-                                       rand.randint(rangeMin, rangeMax))))
-
-
-BACKGROUND_COLOR_RANGE = 150
-STARTING_ROCKS = 200
-SoundService = sounds.SoundService()
-
-
-DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
-AnimateService = animate.AnimateService(DrawService)
-EventService = events.EventService()
-LogicService = logic.LogicService(playerDice, DrawService)
-
-
-SoundService.playMusic()
-
-total = 0
-for die in playerDice:
-    die.rollDie()
+gc = gamecontroller.GameController(monitor)
 
 going = True
 #TODO FPS math?
 
-recentHandScore = None
 print("⚀⚁⚂ DWARF ⚃⚄⚅")
 print("⚀⚁⚂  DICE ⚃⚄⚅")
+
+keyBinds = {
+    
+}
+
+print("loading", end = "...")
+while not gc.isFinishedLoading():
+    print(".", end = "")
+
 while going:
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             going = False
-        # elif event.type == pg.VIDEORESIZE:
-        #     WIDTH = event.w
-        #     HEIGHT = event.h
-        #     DrawService.setScreen(WIDTH, HEIGHT, BACKGROUND_COLOR_RANGE)
-        #     LogicService.unselectAll()
+        elif event.type == pg.VIDEORESIZE:
+            gc.resizeScreen(event.w, event.h)
 
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1: #left mouse button
-                d = EventService.selectRectDie(diceAndRect)
-                if d:
-                    SoundService.selectDiceSound(d.isSelected)
-                else:
-                    SoundService.diceDict["tap"].play()
-                LogicService.addDice()
-                DrawService.BackgroundService.changeShapeColors(LogicService.getSelectedDice(), d)
+                gc.selectDie()
 
         if event.type == pg.KEYDOWN:
             match event.key:
                 case pg.K_SPACE:
-                    # DrawService.BackgroundService.changeDirection()
-                    AnimateService.shakeDice(playerDice)
-                    SoundService.diceRollSound(LogicService.rollsLeft)
-                    LogicService.rollDice()
-                #Scoring a hand
+                    gc.rollDice()
                 case pg.K_q:
-                    AnimateService.shakeDice(playerDice, selected=True)
-                    recentHandScore = LogicService.score()
-                    SoundService.hitSound(recentHandScore)
+                    gc.scoreDice()
                 case pg.K_ESCAPE:
                     going = False
                 case pg.K_p:
-                    LogicService.unselectAll()
-                    LogicService.rollDice()
-                    DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
-                    AnimateService = animate.AnimateService(DrawService)
-                    EventService = events.EventService()
-                    LogicService = logic.LogicService(playerDice, DrawService)
+                    gc.resetLevel()
                 case pg.K_o:
-                    LogicService.unselectAll()
-                    LogicService.rollDice()
-                    BACKGROUND_COLOR_RANGE -= rand.randint(15,25)
-                    if BACKGROUND_COLOR_RANGE <= 15:
-                        BACKGROUND_COLOR_RANGE = 15
-                    STARTING_ROCKS += 50
-                    DrawService = graphics.DrawService(WIDTH, HEIGHT, NUM_SHAPES=STARTING_ROCKS, rangeNum=BACKGROUND_COLOR_RANGE)
-                    AnimateService = animate.AnimateService(DrawService)
-                    EventService = events.EventService()
-                    LogicService = logic.LogicService(playerDice, DrawService)
+                    gc.harderLevel()
 
-    DrawService.resetFrame()
-    #returns list of (die, rect) for EventService
-    diceAndRect = DrawService.drawDice(playerDice)
+    gc.levelLoop()
 
-    EventService.dieHovered(diceAndRect)
-
-    LogicService.findHand()
-
-    DrawService.drawTextContent(LogicService)
-
-    
     fps = int(clock.get_fps())
-    DrawService.drawText(1, f"{fps} fps", WIDTH/10 * 9.25 - WIDTH/10 * .05, HEIGHT/10 * .05)
+    gc.DrawService.drawText(1, f"{fps} fps", WIDTH/10 * 9.25 - WIDTH/10 * .05, HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
