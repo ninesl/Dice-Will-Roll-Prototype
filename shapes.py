@@ -125,6 +125,8 @@ class Shape:
         
     def generateRelativePoints(self):
         points = []
+        # Makes polygon with 5 sides.
+        # uses math I didn't come up with
         angle = 360 / self.sides
         for i in range(self.sides):
             theta = (angle * i) * (math.pi / 180)

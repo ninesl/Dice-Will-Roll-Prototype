@@ -16,8 +16,8 @@ pg.display.set_icon(window_icon)
 clock = pg.time.Clock()
 monitor = pg.display.Info()
 
-WIDTH =  int(monitor.current_w)
-HEIGHT = int(monitor.current_h)
+WIDTH =  int(monitor.current_w * 3 / 4)
+HEIGHT = int(monitor.current_h * 3 / 4)
 
 playerDice = []
 rangeMin, rangeMax = 0,255
@@ -59,7 +59,8 @@ going = True
 #TODO FPS math?
 
 recentHandScore = None
-
+print("⚀⚁⚂ DWARF ⚃⚄⚅")
+print("⚀⚁⚂  DICE ⚃⚄⚅")
 while going:
 
     for event in pg.event.get():
@@ -129,20 +130,3 @@ while going:
     DrawService.drawText(1, f"{fps} fps", WIDTH/10 * 9.25 - WIDTH/10 * .05, HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
-
-##Old code to change background color
-                #left and right arrow keys change background color
-                # case pg.K_LEFT:
-                #     BACKGROUND_COLOR_RANGE -= 15
-                #     if BACKGROUND_COLOR_RANGE < 5:
-                #         BACKGROUND_COLOR_RANGE = 5
-                #     else:
-                #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE, LogicService.   getSelectedDice())
-                #         LogicService.unselectAll()
-                # case pg.K_RIGHT:
-                #     BACKGROUND_COLOR_RANGE += 15
-                #     if BACKGROUND_COLOR_RANGE > 250:
-                #         BACKGROUND_COLOR_RANGE = 250
-                #     else:
-                #         DrawService.setBackgroundColors(BACKGROUND_COLOR_RANGE,LogicService.getSelectedDice())
-                #         LogicService.unselectAll()

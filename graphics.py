@@ -16,10 +16,14 @@ class DrawService:
         self.allHands = []
 
         self.gameFonts = []
-        self.gameFonts.append(pg.font.Font("assets/fonts/ringfont.ttf", int(WIDTH / 25)))
-        self.gameFonts.append(pg.font.Font("assets/fonts/fantasquesansmono.otf", int(WIDTH / 40)))
-        self.gameFonts.append(pg.font.Font("assets/fonts/5x5.ttf", int(WIDTH / 40)))
-        self.gameFonts.append(pg.font.Font("assets/fonts/amaranth.otf", int(WIDTH / 40)))
+
+        bigFont = int(WIDTH / 25)
+        smallFont = int(WIDTH / 40)
+        self.gameFonts.append(pg.font.Font("assets/fonts/ringfont.ttf", bigFont))
+        self.gameFonts.append(pg.font.Font("assets/fonts/fantasquesansmono.otf", smallFont))
+        self.gameFonts.append(pg.font.Font("assets/fonts/Kurland.ttf", bigFont))
+        self.gameFonts.append(pg.font.Font("assets/fonts/5x5.ttf", smallFont))
+        self.gameFonts.append(pg.font.Font("assets/fonts/amaranth.otf", smallFont))
         
         self.setScreen(WIDTH, HEIGHT, rangeNum)
 
@@ -40,8 +44,8 @@ class DrawService:
 
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
         # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
-        # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
-        self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
+        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
+        # self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
         self.dieSide = int(WIDTH / self.gridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
 
@@ -143,11 +147,11 @@ class DrawService:
         marginX = widthGrid * .05
         marginY = heightGrid * .05
 
-        scoreStr = str(f"{LogicService.selectedScoreTotal()} x {LogicService.hand.value[1]}")
+        scoreStr = str(f"{LogicService.selectedScoreString()} x {LogicService.hand.value[1]}")
 
         #current hand
         self.drawText(0, LogicService.hand.value[0], 0,-heightGrid * 1.5, center=True)
-        self.drawText(0, scoreStr, 0,-heightGrid * .75, center=True)
+        self.drawText(2, scoreStr, 0,-heightGrid * .75, center=True)
 
         # if self.allHands:
         #     self.drawText(1, f"{self.allHands[-1]}", widthGrid * 4.25, marginY)
