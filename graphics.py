@@ -10,8 +10,7 @@ class DrawService:
     allHands = []
 
     def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 150, rangeNum = 100):
-        self.gridWidth = 14
-        self.shadowLength = int(WIDTH / 400)
+        self.diceGridWidth = 14
         self.NUM_SHAPES = NUM_SHAPES
         self.allHands = []
 
@@ -36,23 +35,26 @@ class DrawService:
         self.BackgroundService.setRockColors(rangeNum)
         self.BackgroundService.changeShapeColors(selectedDice)
 
-    def deleteRocks(self, num, handType):
-        self.allHands.append(f"{num} : {handType}")
-        # rangeNum = self.BackgroundService.shapes[0].colorRange
+    def deleteRocks(self, num):
         self.BackgroundService.deleteRocks(num)
-        # self.setBackground(rangeNum)
 
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
+        self.heightGrid = HEIGHT/10
+        self.widthGrid = WIDTH/10
+        self.shadowLength = int(WIDTH / 400)
+        self.marginX = self.widthGrid * .05
+        self.marginY = self.heightGrid * .05
+
         self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.RESIZABLE | pg.DOUBLEBUF)
         # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
         # self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
-        self.dieSide = int(WIDTH / self.gridWidth)
+        self.dieSide = int(WIDTH / self.diceGridWidth)
         self.dieSpacing = int(self.dieSide * 1.5)
 
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
 
-        self.diceX = int(self.dieSide * self.gridWidth / 4) #starting row of dice
+        self.diceX = int(self.dieSide * self.diceGridWidth / 4) #starting row of dice
         self.diceY = self.dieSide
 
         self.setBackground(rangeNum)
@@ -140,35 +142,30 @@ class DrawService:
             img = self.gameFonts[index].render(str(msg), True, color)
             self.screen.blit(img, (x,y))
 
+    def drawHandInfo(self, LogicService, msg):
+        currentHandStr = str(f"{LogicService.hand.value[0]}")
+        self.drawText(0, currentHandStr, 0,-self.heightGrid * 1.5, center=True)
+
+        self.drawText(2, f"{msg} x{LogicService.hand.value[1]}", 0,-self.heightGrid * .75, center=True)
+
     def drawTextContent(self, LogicService):
-        heightGrid = self.HEIGHT/10
-        widthGrid = self.WIDTH/10
 
-        marginX = widthGrid * .05
-        marginY = heightGrid * .05
-
-        scoreStr = str(f"{LogicService.selectedScoreString()} x {LogicService.hand.value[1]}")
-
-        #current hand
-        self.drawText(0, LogicService.hand.value[0], 0,-heightGrid * 1.5, center=True)
-        self.drawText(2, scoreStr, 0,-heightGrid * .75, center=True)
-
-        # if self.allHands:
-        #     self.drawText(1, f"{self.allHands[-1]}", widthGrid * 4.25, marginY)
+        #hand info
+        # self.drawHandInfo(LogicService)
 
         #game info
-        self.drawText(1,f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", marginX,marginY)
-        self.drawText(1,f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", marginX,heightGrid * .5 + marginY)
-        self.drawText(1,f"{self.NUM_SHAPES} rocks",                                      marginX,heightGrid + marginY)
+        self.drawText(1,f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", self.marginX,self.marginY)
+        self.drawText(1,f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", self.marginX,self.heightGrid * .5 + self.marginY)
+        self.drawText(1,f"{self.NUM_SHAPES} rocks",                                      self.marginX,self.heightGrid + self.marginY)
 
         #previous hands
         yNum = 9.5
         for strHand in self.allHands:
-            self.drawText(1, f"{strHand}", marginX, heightGrid * yNum - marginY)
+            self.drawText(1, f"{strHand}", self.marginX, self.heightGrid * yNum - self.marginY)
             yNum -= .5
         
         #controls
-        controlText = ["select : click", 
+        controlText = ["  hold : click", 
                        "  roll : space", 
                        " score : Q key", 
                        " reset : P key",
@@ -176,7 +173,7 @@ class DrawService:
                        "  quit :   esc"]
         heightModifier = 7
         for controlT in controlText:
-            self.drawText(1, controlT, widthGrid * 8 + marginX * 2, heightGrid * heightModifier - marginY)
+            self.drawText(1, controlT, self.widthGrid * 8 + self.marginX * 2, self.heightGrid * heightModifier - self.marginY)
             heightModifier += .5
 
     #draws pips onto face. Call after drawDieFace()

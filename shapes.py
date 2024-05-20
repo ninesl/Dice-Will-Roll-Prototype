@@ -64,14 +64,14 @@ class Background:
             numRocks = len(self.shapes)
 
         rocksDeleted = random.sample(self.shapes, numRocks)
-        self.setRockColors(5, rocksDeleted)
+        # self.setRockColors(5, rocksDeleted)
 
         self.changingShapesArray = []
 
         for shape in rocksDeleted:
             # shape.setTargetColor(pg.Color(255,255,255,255))
+            shape.setFullColor(shape.colorRange)
             self.shapes.remove(shape)
-
         for shape in self.shapes:
             shape.setFullColor(shape.colorRange)
 

@@ -12,11 +12,15 @@ class GameController:
     STARTING_ROCKS = 200
     GOING = True
 
-    def __init__(self, monitor):
+    def __init__(self, monitor, clock, fps):
         self.monitor = monitor
+        self.clock = clock
+        self.fps = fps
 
-        self.WIDTH  = int(monitor.current_w * 3 / 4)
-        self.HEIGHT = int(monitor.current_h * 3 / 4)
+        # self.WIDTH  = int(monitor.current_w * 3 / 4)
+        # self.HEIGHT = int(monitor.current_h * 3 / 4)
+        self.WIDTH = 1600
+        self.HEIGHT = 900
 
         self.setDice()
         self.recentHandScore = None
@@ -42,7 +46,7 @@ class GameController:
 
     def setServices(self):
         self.DrawService    = graphics.DrawService(self.WIDTH, self.HEIGHT, NUM_SHAPES=self.STARTING_ROCKS, rangeNum=self.BACKGROUND_COLOR_RANGE)
-        self.AnimateService = animate.AnimateService(self.DrawService)
+        self.AnimateService = animate.AnimateService(self.DrawService, self.clock, self.fps, self.SoundService)
         self.EventService   = events.EventService()
         self.LogicService   = logic.LogicService(self.playerDice, self.DrawService)
 
@@ -84,11 +88,14 @@ class GameController:
         self.SoundService.diceRollSound(self.LogicService.rollsLeft)
         self.LogicService.rollDice()
 
+    def startScoring(self):
+        self.recentHandScore = self.LogicService.score()
 
     def scoreDice(self):
         self.AnimateService.shakeDice(self.playerDice, selected=True)
         self.recentHandScore = self.LogicService.score()
         self.SoundService.hitSound(self.recentHandScore)
+
      
     def resetLevel(self):
         self.LogicService.unselectAll()
@@ -112,4 +119,5 @@ class GameController:
         self.diceAndRect = self.DrawService.drawDice(self.playerDice)
         self.EventService.dieHovered(self.diceAndRect)
         self.LogicService.findHand()
+        self.AnimateService.animateScoringHand(self.LogicService)
         self.DrawService.drawTextContent(self.LogicService)

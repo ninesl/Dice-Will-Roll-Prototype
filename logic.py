@@ -23,6 +23,8 @@ class LogicService:
 
         self.hand = DiceHand.NO_HAND
         self.playerDice = playerDice
+
+        self.isScoring = False
         self.scoringHandDice = []
 
         self.rollsLeft = self.STARTING_ROLLS
@@ -34,36 +36,34 @@ class LogicService:
         if self.rockHealth <= 0:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
-
-    def selectedScoreString(self):
-        pipChars = "⚀⚁⚂⚃⚄⚅"
-        handVals = ""
-        for die in self.scoringHandDice:
-            handVals += f"{pipChars[die.curSide.getNum() - 1]} "
-        return handVals.strip()
-
+    
     def selectedScoreTotal(self):
         total = 0
         for die in self.scoringHandDice:
             total += die.calculate()
         return total
+    
+    def stopScoring(self):
+        self.isScoring = False
+        for die in self.getSelectedDice():
+            die.select()
+            die.rollDie()
 
+    #returns False if no hand, returns hand num otherwise
     def score(self):
         if self.rockHealth > 0 and self.scoringHandDice:
             if self.handsLeft > 0:
+                self.isScoring = True
+
                 self.handsLeft -= 1
                 scoredHandNum = self.selectedScoreTotal() * self.hand.value[1]
                 self.subtractHealth(scoredHandNum)
 
-                for die in self.getSelectedDice():
-                    die.select()
-                    die.rollDie()
-
-                self.DrawService.deleteRocks(scoredHandNum, self.hand.value[0])
+                self.DrawService.allHands.append(f"{scoredHandNum} : {self.hand.value[0]}")
 
                 self.rollsLeft = self.STARTING_ROLLS
-                self.scoringHandDice = []
                 return scoredHandNum
+        return False
         
     def addDice(self):
         self.total = 0
