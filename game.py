@@ -10,11 +10,15 @@ pg.display.set_icon(window_icon)
 
 clock = pg.time.Clock()
 monitor = pg.display.Info()
+fps = 60
 
-WIDTH =  int(monitor.current_w * 3 / 4)
-HEIGHT = int(monitor.current_h * 3 / 4)
+# WIDTH =  int(monitor.current_w * 3 / 4)
+# HEIGHT = int(monitor.current_h * 3 / 4)
 
-gc = gamecontroller.GameController(monitor)
+# WIDTH = 1600
+# HEIGHT = 900
+
+gc = gamecontroller.GameController(monitor, clock, fps)
 
 # class Controls(Enum):
 #     ROLL  = gc.rollDice,
@@ -67,27 +71,32 @@ def replaceKeyBind(oldKey, newKey):
 
 # fpsCount = 1
 while gc.GOING:
+    gc.levelLoop()
+
     for event in pg.event.get():
         try:
             if event.type == pg.QUIT:
                 gc.quitGame()
-            elif event.type == pg.VIDEORESIZE:
+            #TODO resize while scoring
+            if event.type == pg.VIDEORESIZE:
                 gc.resizeScreen(event.w, event.h)
+                
+            if not gc.LogicService.isScoring:
 
-            if event.type == pg.MOUSEBUTTONDOWN:
-                controls[keyBinds[event.button]]()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    controls[keyBinds[event.button]]()
 
-            if event.type == pg.KEYDOWN:
-                controls[keyBinds[event.key]]()
+                if event.type == pg.KEYDOWN:
+                    controls[keyBinds[event.key]]()
         except KeyError:
             pass  # Explicitly doing nothing
 
-    gc.levelLoop()
 
     fps = int(clock.get_fps())
     gc.DrawService.drawText(1, f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
+    # clock.tick_busy_loop(fps)
     
     # fpsCount += 1
     # if fpsCount >= 120:
