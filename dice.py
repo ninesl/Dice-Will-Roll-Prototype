@@ -34,7 +34,7 @@ class Die:
     
     def getColor(self):
         if self.isHovered:
-            self.curSide.color.a = 150 #slightly transparent
+            self.curSide.color.a = 50 #slightly transparent
         else:
             self.curSide.color.a = 255 #set to opaque
         return self.curSide.color
@@ -45,7 +45,7 @@ class Die:
 class Side:
     def __init__(self, value, color):
         self.pips = []
-        self.modEnum = None
+        self.mod = None
         self.color = color
         for _ in range(value):
             self.pips.append(Pip())
@@ -53,9 +53,11 @@ class Side:
     def getCalculate(self):
         score = 0
         for pip in self.pips:
-            match pip.gem:
+            match pip.mod:
                 case Mod.ATK:
                     score += 2
+                    if self.mod == pip.mod:
+                        score += 1
                 # case Mod.DEF:
                 #     break
                 # case Mod.GOLD:
@@ -65,7 +67,7 @@ class Side:
         return score
     
     def getPips(self):
-        #todo return pips for gem in DrawService graphics.py
+        #todo return pips for mod in DrawService graphics.py
         return self.pips
     
     def getNum(self):
@@ -77,25 +79,15 @@ class Side:
         
 class Pip:
     def __init__(self):
-        self.gem = Mod.BASE
-        match random.randint(0,2):
-            case 0:
-                self.gem = Mod.BASE
-            case 1:
-                self.gem = Mod.ATK
-            # case 2:
-            #     self.gem = Mod.DEF
-            # case 3:
-            #     self.gem = Mod.GOLD
-
+        self.mod = Mod.BASE
 
     def getPipColor(self):
-        return self.gem.value
+        return self.mod.value
 
 class Mod(Enum):
     ATK = pg.Color(255,0,0,230)
     # DEF = pg.Color(0,100,255,230)
-    # GOLD = pg.Color(255,215,0,230)
+    GOLD = pg.Color(255,215,0,230)
     BASE = pg.Color(0,0,0,230)
     # ATK  = pg.Color(0,0,0,230)
 

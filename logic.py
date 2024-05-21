@@ -15,8 +15,8 @@ class DiceHand(Enum):
     FIVE_OF_A_KIND  = ["Five of a Kind", 15]
 
 class LogicService:
-    STARTING_ROLLS = 3
-    STARTING_HANDS = 5
+    STARTING_ROLLS = 2
+    STARTING_HANDS = 3
 
     def __init__(self, playerDice, DrawService):
         self.DrawService = DrawService
@@ -48,6 +48,7 @@ class LogicService:
         return math.ceil(total)
     
     def stopScoring(self, SoundService):
+        self.subtractHealth(self.recentHandScoreNum)
         self.isScoring = False
         for die in self.getSelectedDice():
             die.select()
@@ -55,15 +56,17 @@ class LogicService:
         self.DrawService.allHands.append(f"{self.recentHandScoreNum} : {self.hand.value[0]}")
         SoundService.diceRollSound(1)
 
-    #returns False if no hand, returns hand num otherwise
     def score(self):
+        self.startScoring()
+        
+    #returns False if no hand, returns hand num otherwise
+    def startScoring(self):
         if self.rockHealth > 0 and self.scoringHandDice:
             if self.handsLeft > 0:
                 self.isScoring = True
 
                 self.handsLeft -= 1
                 self.recentHandScoreNum = self.selectedScoreTotal()
-                self.subtractHealth(self.recentHandScoreNum)
                 self.rollsLeft = self.STARTING_ROLLS
                 return self.recentHandScoreNum
         return False
@@ -87,6 +90,9 @@ class LogicService:
     def unselectAll(self):
         for die in self.getSelectedDice():
             die.select()
+
+    def isNextLevel(self):
+        return not self.isScoring and self.rockHealth <= 0
 
     def findHand(self):
         handDicePips = [die.curSide.getNum() for die in self.getSelectedDice() if die.isSelected]

@@ -6,10 +6,11 @@ import events
 import logic
 import sounds
 import animate
+from enum import Enum
 
 class GameController:
-    BACKGROUND_COLOR_RANGE = 150
-    STARTING_ROCKS = 200
+    BACKGROUND_COLOR_RANGE = 190
+    STARTING_ROCKS = 10
     GOING = True
 
     def __init__(self, monitor, clock, fps):
@@ -17,8 +18,10 @@ class GameController:
         self.clock = clock
         self.fps = fps
 
-        self.WIDTH  = int(monitor.current_w * 5/6)
-        self.HEIGHT = int(monitor.current_h * 5/6)
+        self.currentState = LevelState.LEVEL
+
+        self.WIDTH  = int(monitor.current_w * 8.5/10)
+        self.HEIGHT = int(monitor.current_h * 8.5/10)
         # self.WIDTH = 1600
         # self.HEIGHT = 900
 
@@ -50,25 +53,22 @@ class GameController:
         self.EventService   = events.EventService()
         self.LogicService   = logic.LogicService(self.playerDice, self.DrawService)
 
+    def newDice(self):
+        self.playerDice.append(dice.Die(6, 
+                                        pg.Color(rand.randint(self.rangeDieMin, self.rangeDieMax), 
+                                                 rand.randint(self.rangeDieMin, self.rangeDieMax), 
+                                                 rand.randint(self.rangeDieMin, self.rangeDieMax))))
+        self.rangeDieMin -= 15
+        self.rangeDieMax -= 15
+
+
+    numStartDice = 1
     def setDice(self):
         self.playerDice = []
-        
-        rangeMin, rangeMax = 0,255
-        self.playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                                    rand.randint(rangeMin, rangeMax),
-                                                    rand.randint(rangeMin, rangeMax))))
-        self.playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                                    rand.randint(rangeMin, rangeMax),
-                                                    rand.randint(rangeMin, rangeMax))))
-        self.playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                                    rand.randint(rangeMin, rangeMax),
-                                                    rand.randint(rangeMin, rangeMax))))
-        self.playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                                    rand.randint(rangeMin, rangeMax),
-                                                    rand.randint(rangeMin, rangeMax))))
-        self.playerDice.append(dice.Die(6, pg.Color(rand.randint(rangeMin, rangeMax), 
-                                                    rand.randint(rangeMin, rangeMax),
-                                                    rand.randint(rangeMin, rangeMax))))
+        self.rangeDieMin, self.rangeDieMax = 250,255
+        for _ in range(self.numStartDice):
+            self.newDice()
+            
             
         for die in self.playerDice:
             die.rollDie()
@@ -100,18 +100,50 @@ class GameController:
         self.LogicService.unselectAll()
         self.LogicService.rollDice()
 
-        self.BACKGROUND_COLOR_RANGE -= rand.randint(15,25)
-        if self.BACKGROUND_COLOR_RANGE <= 15:
-            self.BACKGROUND_COLOR_RANGE = 15
-        self.STARTING_ROCKS += 50
+        self.BACKGROUND_COLOR_RANGE -= rand.randint(5,15)
+        if self.BACKGROUND_COLOR_RANGE <= self.DrawService.BACKGROUND_COLOR_RANGE_DIFF:
+            self.BACKGROUND_COLOR_RANGE = self.DrawService.BACKGROUND_COLOR_RANGE_DIFF
+        self.STARTING_ROCKS += 25
         
         self.setServices()
 
     def levelLoop(self):
-        self.DrawService.resetFrame()
         #returns list of (die, rect) for EventService
         self.diceAndRect = self.DrawService.drawDice(self.playerDice, self.LogicService.scoringHandDice)
         self.EventService.dieHovered(self.diceAndRect)
         self.LogicService.findHand()
+        self.DrawService.drawPreviousHands()
+
+        if self.LogicService.isNextLevel():
+            self.DrawService.drawText(2, "Level Completed!", 0,-self.DrawService.heightGrid * 1.5, center=True)
+            self.DrawService.drawText(2, f"W to go to the shop", 0,-self.DrawService.heightGrid * .75, center=True)
+            return
+        
+        self.DrawService.drawLevelText(self.LogicService)
         self.AnimateService.animateScoringHand(self.LogicService)
-        self.DrawService.drawTextContent(self.LogicService)
+
+    def shopLoop(self):
+        self.diceAndRect = self.DrawService.drawAllDiceFaces(self.playerDice)
+
+    def gameLoop(self):
+        self.DrawService.resetFrame()
+        self.DrawService.drawControlsText(self.currentState.value)
+        match self.currentState:
+            case LevelState.LEVEL:
+                self.levelLoop()
+            case LevelState.SHOP:
+                self.shopLoop()
+
+    def goToShop(self):
+        self.currentState = LevelState.SHOP
+    def goToLevel(self):
+        self.currentState = LevelState.LEVEL
+
+class LevelState(Enum):
+    SHOP  =["yes"]
+    LEVEL =["  hold : click",
+            "  roll : space",
+            " score : Q key",
+        #   " reset : P key",
+        #   "harder : O key",
+            "  quit :   esc"]

@@ -28,23 +28,7 @@ gc = gamecontroller.GameController(monitor, clock, fps)
 #     RESET = gc.resetLevel,
 #     HARDER= gc.harderLevel
 
-keyBinds = {
-    pg.K_SPACE: "roll",
-    1: "select",
-    pg.K_ESCAPE: "quit",
-    pg.K_q: "score",
-    pg.K_p: "reset",
-    pg.K_o: "harder"
-}
 
-controls = {
-    "roll"  :gc.rollDice,
-    "select":gc.selectDie,
-    "quit"  :gc.quitGame,
-    "score" :gc.scoreDice,
-    "reset" :gc.resetLevel,
-    "harder":gc.harderLevel
-}
 
 print("loading", end = ".")
 while not gc.isFinishedLoading():
@@ -57,21 +41,54 @@ print("⚀⚁⚂ DWARF ⚃⚄⚅")
 print("⚀⚁⚂  DICE ⚃⚄⚅")
 print(" ⚀ ⚁ ⚂ ⚃ ⚄ ⚅")
 
-def replaceKeyBind(oldKey, newKey):
-    # print(chr(oldKey))
-    # print(chr(newKey))
-    global keyBinds
-    if oldKey in keyBinds:
-        action = keyBinds.pop(oldKey)
-        keyBinds[newKey] = action
+# def replaceKeyBind(oldKey, newKey):
+#     # print(chr(oldKey))
+#     # print(chr(newKey))
+#     global keyBinds
+#     if oldKey in keyBinds:
+#         action = keyBinds.pop(oldKey)
+#         keyBinds[newKey] = action
     
-# Example of updating key bindings
-# Change roll action from space key to 'r' key
-# replaceKeyBind(pg.K_SPACE, pg.K_r)
+# # Example of updating key bindings
+# # Change roll action from space key to 'r' key
+# # replaceKeyBind(pg.K_SPACE, pg.K_r)
 
+keyBinds = {
+    "level" : {
+        pg.K_SPACE: "roll",
+        1: "hold",
+        pg.K_ESCAPE: "quit",
+        pg.K_q: "score",
+        pg.K_p: "reset",
+        pg.K_o: "harder",
+        pg.K_w: "shop",
+        pg.K_r: "newdie"
+    },
+    "shop" : {
+        pg.K_ESCAPE: "quit",
+        1: "hold",
+        pg.K_e: "level",
+        pg.K_r: "newdie"
+    }
+}
+
+#everything
+controls = {
+    "roll"  :gc.rollDice,
+    "hold"  :gc.selectDie,
+    "quit"  :gc.quitGame,
+    "score" :gc.scoreDice,
+    "reset" :gc.resetLevel,
+    "harder":gc.harderLevel,
+    "shop"  :gc.goToShop,
+    "level" :gc.goToLevel,
+    "newdie":gc.newDice
+}
+
+GAME_STATE = "level"
+currentAction = ""
 # fpsCount = 1
 while gc.GOING:
-    gc.levelLoop()
 
     for event in pg.event.get():
         try:
@@ -82,14 +99,19 @@ while gc.GOING:
             #     gc.resizeScreen(event.w, event.h)
                 
             if not gc.LogicService.isScoring:
-
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    controls[keyBinds[event.button]]()
+                    currentAction = keyBinds[GAME_STATE][event.button]
+                    controls[currentAction]()
 
                 if event.type == pg.KEYDOWN:
-                    controls[keyBinds[event.key]]()
+                    currentAction = keyBinds[GAME_STATE][event.key]
+                    controls[currentAction]()
+
+                if currentAction in keyBinds:
+                    GAME_STATE = currentAction
         except KeyError:
             pass  # Explicitly doing nothing
+    gc.gameLoop()
 
 
     fps = int(clock.get_fps())

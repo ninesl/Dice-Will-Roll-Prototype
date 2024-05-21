@@ -3,7 +3,7 @@ import pygame as pg
 import math
 
 class Background:
-    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 100, colorRangeNum = 100, oneXthOfRocks = 6):
+    def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 100, colorRangeNum = 100, oneXthOfRocks = 4):
         #Adjust to set bounds for shapes bouncing
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
@@ -177,4 +177,5 @@ class Shape:
 def randomColor(midRange):
     # Maintain the range for visual feedback while ensuring consistent transition speed
     num = random.randint(midRange - 5, midRange + 5)
+    num = 0 if num < 0 else num
     return pg.Color(num, num, num, 255)

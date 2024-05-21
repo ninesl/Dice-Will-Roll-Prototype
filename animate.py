@@ -57,41 +57,37 @@ class AnimateService:
             self.scoreString = self.selectedScoreString(LogicService.scoringHandDice)
 
         self.scoreString = "".join(self.scoreString)
-        self.DrawService.drawHandInfo(LogicService, self.scoreString.strip())
+        self.DrawService.drawHandText(LogicService, self.scoreString.strip())
         
 
-    def shakeDice(self, playerDice, selected = False):
-        oldDiceX = self.DrawService.diceX
-        oldDiceY = self.DrawService.diceY
+    def shakeDice(self, playerDice, selected=False):
+        # Calculate the initial x position to center the dice
+        totalWidth = self.DrawService.getTotalDiceWidth(playerDice)
+        oldDiceX = (self.DrawService.WIDTH - totalWidth) // 2
 
         shake_duration = 10  # Total shakes
         max_shake_range = 15  # Max pixels to shake
 
-        # Redraw the dice at new position
-        # self.DrawService.drawDice(dieToKeep)
+        y = self.DrawService.levelDiceY
 
-        # self.DrawService.diceY += int(self.DrawService.dieSide * 1.5)
-        y = self.DrawService.diceY
         for _ in range(shake_duration):
-            x = self.DrawService.diceX
+            x = oldDiceX
             for die in playerDice:
-                if not die.isSelected and not selected or die.isSelected and selected:
-                    # die.rollDie()
-                    pixelShakeX = random.randint(-max_shake_range, max_shake_range)
-                    pixelShakeY = random.randint(-max_shake_range, max_shake_range)
+                if not die.isSelected and not selected or die.isSelected and    selected:
+                    pixelShakeX = random.randint(-max_shake_range,  max_shake_range)
+                    pixelShakeY = random.randint(-max_shake_range,  max_shake_range)
+
                     # Temporarily update dice positions
                     x += pixelShakeX
                     y += pixelShakeY
+
                     # Redraw the die at new position
                     self.DrawService.drawDie(die, x, y)
+
                     # Reset dice positions
                     x -= pixelShakeX
                     y -= pixelShakeY
 
-                x += self.DrawService.dieSpacing
-            
+                x += self.DrawService.dieSide + self.DrawService.dieSpacing
+
             pg.display.update()
-                    
-        # Ensure dice positions are reset after shaking
-        self.DrawService.diceX = oldDiceX
-        self.DrawService.diceY = oldDiceY
