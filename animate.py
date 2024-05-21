@@ -9,44 +9,54 @@ class AnimateService:
         self.fps = fps * 10 #fps miliseconds
 
         self.startingFrame = None
+        self.scoreString = ""
 
         self.scoreStringIndex = 0
+        self.scoreIndex = 0
+        self.totalScore = -1
     
     def selectedScoreString(self, scoringHandDice):
         pipChars = "⚀⚁⚂⚃⚄⚅"
-        handVals = ""
+        handVals = []
         for die in scoringHandDice:
-            handVals += f"{pipChars[die.curSide.getNum() - 1]}"
-        return handVals.strip()
+            handVals.append(f"{pipChars[die.curSide.getNum() - 1]}")
+        return handVals
     
     def animateScoringHand(self, LogicService):
+        self.scoreString = list(self.scoreString)
         if LogicService.isScoring:
-            self.scoreString = list(self.scoreString)
+            scoreMatches = self.totalScore == LogicService.selectedScoreTotal()
             if not self.startingFrame:
                 self.startingFrame = pg.time.get_ticks()
+                self.SoundService.diceDict["deselect"].play()
+                if not scoreMatches:
 
-                self.SoundService.diceDict["tap"].play()
-                self.startingFrame = pg.time.get_ticks()
-            
-                curDieNum = LogicService.scoringHandDice[self.scoreStringIndex].curSide.getNum()
-                self.scoreString[self.scoreStringIndex] = str(curDieNum)
+                    curDieCalcNum = LogicService.scoringHandDice[self.scoreIndex].calculate()
+                    self.scoreString[self.scoreStringIndex] = f"{curDieCalcNum} "
 
-                self.DrawService.deleteRocks(LogicService.scoringHandDice[self.scoreStringIndex].calculate())
+                    self.DrawService.deleteRocks(curDieCalcNum)
 
-                self.scoreStringIndex += 1
-                
-            elif self.startingFrame + self.fps < pg.time.get_ticks():
+                    self.scoreStringIndex += len(str(curDieCalcNum)) + 1
+                    self.scoreIndex += 1
+            elif self.startingFrame + self.fps // 1.5 < pg.time.get_ticks():
                 self.startingFrame = None
-                if self.scoreStringIndex == len(self.scoreString):
-                    self.scoreStringIndex = 0
-                    self.startingFrame = None
-                    LogicService.stopScoring()
 
-            self.scoreString = "".join(self.scoreString)
+                if scoreMatches:
+                    numRocksToDelete = self.totalScore - LogicService.selectedScoreTotal(handMult = False)
+                    self.DrawService.deleteRocks(numRocksToDelete)
+                    self.SoundService.hitSound(self.totalScore)
+                    self.totalScore = 0
+                    LogicService.stopScoring(self.SoundService)
+                elif self.scoreStringIndex == len(self.scoreString):
+                    self.scoreIndex = 0
+                    self.scoreStringIndex = 0
+                    self.totalScore = LogicService.selectedScoreTotal()
+                    self.scoreString = [str(self.totalScore)]
         else:
             self.scoreString = self.selectedScoreString(LogicService.scoringHandDice)
 
-        self.DrawService.drawHandInfo(LogicService, self.scoreString)
+        self.scoreString = "".join(self.scoreString)
+        self.DrawService.drawHandInfo(LogicService, self.scoreString.strip())
         
 
     def shakeDice(self, playerDice, selected = False):

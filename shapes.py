@@ -74,6 +74,7 @@ class Background:
             self.shapes.remove(shape)
         for shape in self.shapes:
             shape.setFullColor(shape.colorRange)
+        # print(numRocks, len(self.shapes))
 
     #takes list of shapes to remove, gotten from addChangingShapes()
     def removeChangingShapes(self, removedShapes):

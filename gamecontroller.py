@@ -17,10 +17,10 @@ class GameController:
         self.clock = clock
         self.fps = fps
 
-        # self.WIDTH  = int(monitor.current_w * 3 / 4)
-        # self.HEIGHT = int(monitor.current_h * 3 / 4)
-        self.WIDTH = 1600
-        self.HEIGHT = 900
+        self.WIDTH  = int(monitor.current_w * 3 / 4)
+        self.HEIGHT = int(monitor.current_h * 3 / 4)
+        # self.WIDTH = 1600
+        # self.HEIGHT = 900
 
         self.setDice()
         self.recentHandScore = None
@@ -88,15 +88,9 @@ class GameController:
         self.SoundService.diceRollSound(self.LogicService.rollsLeft)
         self.LogicService.rollDice()
 
-    def startScoring(self):
-        self.recentHandScore = self.LogicService.score()
-
     def scoreDice(self):
-        self.AnimateService.shakeDice(self.playerDice, selected=True)
-        self.recentHandScore = self.LogicService.score()
-        self.SoundService.hitSound(self.recentHandScore)
+        self.LogicService.score()
 
-     
     def resetLevel(self):
         self.LogicService.unselectAll()
         self.LogicService.rollDice()
@@ -116,7 +110,7 @@ class GameController:
     def levelLoop(self):
         self.DrawService.resetFrame()
         #returns list of (die, rect) for EventService
-        self.diceAndRect = self.DrawService.drawDice(self.playerDice)
+        self.diceAndRect = self.DrawService.drawDice(self.playerDice, self.LogicService.scoringHandDice)
         self.EventService.dieHovered(self.diceAndRect)
         self.LogicService.findHand()
         self.AnimateService.animateScoringHand(self.LogicService)

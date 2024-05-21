@@ -5,6 +5,7 @@ class DrawService:
     transparent = pg.Color(0,0,0,0)
     shadow = pg.Color(0,0,0,105)
     selectedColor = pg.Color(255,100,50,34)
+    scoredColor = pg.Color(255,255,255,134)
 
     dieRadius = 15
     allHands = []
@@ -65,7 +66,7 @@ class DrawService:
         # background = pg.image.load('assets/background.png')
         # self.screen.blit(background, (0,0))
 
-    def drawDieFace(self, x, y, die):
+    def drawDieFace(self, x, y, die, scoredDice):
         dieFace = pg.Surface((self.dieSide, self.dieSide), pg.SRCALPHA)
         
         #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
@@ -83,7 +84,12 @@ class DrawService:
                                    y - self.dieSide * 0.1 - outline_thickness,
                                    scaled_die_side + outline_thickness * 2,
                                    scaled_die_side + outline_thickness * 2)
-            pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=self.dieRadius)
+            
+            if scoredDice:
+                if die in scoredDice:
+                    pg.draw.rect(self.screen, self.scoredColor, outline_rect, border_radius=self.dieRadius)
+                else:
+                    pg.draw.rect(self.screen, self.selectedColor, outline_rect, border_radius=self.dieRadius)
 
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
@@ -102,21 +108,21 @@ class DrawService:
 
         return dieFace.get_rect().move(x,y) #return rect
     
-    def drawDice(self, dice):
+    def drawDice(self, dice, scoredDice = None):
         diceAndRect = [] #(d, dieRect)
         x = self.diceX
         y = self.diceY
         for die in dice:
-            diceAndRect.append(self.drawDie(die, x, y))
+            diceAndRect.append(self.drawDie(die, x, y, scoredDice))
             x += self.dieSpacing # num grid spaces over
         return diceAndRect
 
-    def drawDie(self, d, x, y):
+    def drawDie(self, d, x, y, scoredDice = None):
         # check for die attributes, color pips etc..
         pipGridNum = 7
         pipGrid = self.getPipGrid(d, pipGridNum)
 
-        dieRect = self.drawDieFace(x, y, d)
+        dieRect = self.drawDieFace(x, y, d, scoredDice)
         self.drawPips(x, y, pipGrid, d)
 
         #for clickable obj
@@ -143,10 +149,10 @@ class DrawService:
             self.screen.blit(img, (x,y))
 
     def drawHandInfo(self, LogicService, msg):
-        currentHandStr = str(f"{LogicService.hand.value[0]}")
-        self.drawText(0, currentHandStr, 0,-self.heightGrid * 1.5, center=True)
+        currentHandStr = str(f"{LogicService.hand.value[0]}  X {LogicService.hand.value[1]}")
+        self.drawText(2, currentHandStr, 0,-self.heightGrid * 1.5, center=True)
 
-        self.drawText(2, f"{msg} x{LogicService.hand.value[1]}", 0,-self.heightGrid * .75, center=True)
+        self.drawText(2, f"{msg}", 0,-self.heightGrid * .75, center=True)
 
     def drawTextContent(self, LogicService):
 

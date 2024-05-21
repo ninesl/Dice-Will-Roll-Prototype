@@ -1,14 +1,15 @@
 from collections import Counter
 from enum import Enum
+import math
 
 class DiceHand(Enum):
     NO_HAND         = ["No Hand",        0]
     HIGH_DIE        = ["High Die",       1]
     ONE_PAIR        = ["One Pair",       1]
-    TWO_PAIR        = ["Two Pair",       1]
+    TWO_PAIR        = ["Two Pair",       1.5]
     THREE_OF_A_KIND = ["Three of a Kind",2]
     STRAIGHT_SMALL  = ["Small Straight", 3]
-    STRAIGHT_LARGE  = ["Large Straight", 3]
+    STRAIGHT_LARGE  = ["Large Straight", 3.5]
     FULL_HOUSE      = ["Full House",     5]
     FOUR_OF_A_KIND  = ["Four of a Kind", 10]
     FIVE_OF_A_KIND  = ["Five of a Kind", 15]
@@ -26,6 +27,7 @@ class LogicService:
 
         self.isScoring = False
         self.scoringHandDice = []
+        self.recentHandScoreNum = 0
 
         self.rollsLeft = self.STARTING_ROLLS
         self.handsLeft = self.STARTING_HANDS
@@ -37,17 +39,21 @@ class LogicService:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
     
-    def selectedScoreTotal(self):
+    def selectedScoreTotal(self, handMult = True):
         total = 0
         for die in self.scoringHandDice:
             total += die.calculate()
-        return total
+        if handMult:
+            total *= self.hand.value[1]
+        return math.ceil(total)
     
-    def stopScoring(self):
+    def stopScoring(self, SoundService):
         self.isScoring = False
         for die in self.getSelectedDice():
             die.select()
             die.rollDie()
+        self.DrawService.allHands.append(f"{self.recentHandScoreNum} : {self.hand.value[0]}")
+        SoundService.diceRollSound(1)
 
     #returns False if no hand, returns hand num otherwise
     def score(self):
@@ -56,13 +62,10 @@ class LogicService:
                 self.isScoring = True
 
                 self.handsLeft -= 1
-                scoredHandNum = self.selectedScoreTotal() * self.hand.value[1]
-                self.subtractHealth(scoredHandNum)
-
-                self.DrawService.allHands.append(f"{scoredHandNum} : {self.hand.value[0]}")
-
+                self.recentHandScoreNum = self.selectedScoreTotal()
+                self.subtractHealth(self.recentHandScoreNum)
                 self.rollsLeft = self.STARTING_ROLLS
-                return scoredHandNum
+                return self.recentHandScoreNum
         return False
         
     def addDice(self):
