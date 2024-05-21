@@ -26,18 +26,19 @@ class AnimateService:
         self.scoreString = list(self.scoreString)
         if LogicService.isScoring:
             scoreMatches = self.totalScore == LogicService.selectedScoreTotal()
+            
             if not self.startingFrame:
                 self.startingFrame = pg.time.get_ticks()
                 self.SoundService.diceDict["deselect"].play()
-                if not scoreMatches:
 
+                if not scoreMatches:
                     curDieCalcNum = LogicService.scoringHandDice[self.scoreIndex].calculate()
                     self.scoreString[self.scoreStringIndex] = f"{curDieCalcNum} "
-
                     self.DrawService.deleteRocks(curDieCalcNum)
 
                     self.scoreStringIndex += len(str(curDieCalcNum)) + 1
                     self.scoreIndex += 1
+
             elif self.startingFrame + self.fps // 1.5 < pg.time.get_ticks():
                 self.startingFrame = None
 
