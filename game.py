@@ -78,8 +78,8 @@ while gc.GOING:
             if event.type == pg.QUIT:
                 gc.quitGame()
             #TODO resize while scoring
-            if event.type == pg.VIDEORESIZE:
-                gc.resizeScreen(event.w, event.h)
+            # if event.type == pg.VIDEORESIZE:
+            #     gc.resizeScreen(event.w, event.h)
                 
             if not gc.LogicService.isScoring:
 

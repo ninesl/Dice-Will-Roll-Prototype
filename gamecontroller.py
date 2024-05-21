@@ -17,8 +17,8 @@ class GameController:
         self.clock = clock
         self.fps = fps
 
-        self.WIDTH  = int(monitor.current_w * 3 / 4)
-        self.HEIGHT = int(monitor.current_h * 3 / 4)
+        self.WIDTH  = int(monitor.current_w * 5/6)
+        self.HEIGHT = int(monitor.current_h * 5/6)
         # self.WIDTH = 1600
         # self.HEIGHT = 900
 
@@ -39,7 +39,7 @@ class GameController:
         self.LogicService.unselectAll()
         
         self.DrawService = graphics.DrawService(self.WIDTH, self.HEIGHT, NUM_SHAPES=self.LogicService.rockHealth, rangeNum=self.BACKGROUND_COLOR_RANGE)
-        self.AnimateService = animate.AnimateService(self.DrawService)
+        self.AnimateService = animate.AnimateService(self.DrawService, self.clock, self.fps, self.SoundService)
 
     def isFinishedLoading(self):
         return self.DrawService and self.AnimateService and self.EventService and self.LogicService and self.SoundService
