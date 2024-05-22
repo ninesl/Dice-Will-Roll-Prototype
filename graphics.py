@@ -307,7 +307,7 @@ class DrawService:
         if vertical:
             total_height = num_buttons * button_height + (num_buttons - 1) * spacing
             startY = (self.HEIGHT - total_height) / 2 + button_height / 2
-            centerX = self.WIDTH / 2 + self.dieSide
+            centerX = self.WIDTH / 4 * 3
         else:
             total_width = num_buttons * button_width + (num_buttons - 1) * spacing
             startX = (self.WIDTH - total_width) / 2 + button_width / 2
@@ -365,6 +365,8 @@ class Button:
 
     def updateText(self, newText):
         self.text = newText
+        self.textSurface = self.font.render(self.text, True, self.fontColor)
+        self.textShadowSurface = self.font.render(self.text, True, self.shadowColor)
 
     def draw(self):
         buttonColor = self.color

@@ -11,7 +11,7 @@ class Die:
 
         self.sides = []
         for i in range(sides):
-            self.sides.append( Side(i + 1, color) ) # create a side with i+1 pips
+            self.sides.append( Side(i + 1, color, self) ) # create a side with i+1 pips
         self.curSide = self.sides[0]
     
     def getNumSides(self):
@@ -43,7 +43,8 @@ class Die:
         return self.curSide.getCalculate()
 
 class Side:
-    def __init__(self, value, color):
+    def __init__(self, value, color, parentDie):
+        self.parentDie = parentDie
         self.pips = []
         self.mods = []
         self.originalColor = color
