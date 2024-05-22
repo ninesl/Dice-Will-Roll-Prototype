@@ -18,6 +18,11 @@ class LogicService:
     STARTING_ROLLS = 2
     STARTING_HANDS = 3
 
+    interestThreshold = 5
+    stageClearBonus = 4
+
+    goldPipsThisLevel = 0
+
     def __init__(self, playerDice, DrawService):
         self.DrawService = DrawService
         self.rockHealth = DrawService.NUM_SHAPES
@@ -32,20 +37,40 @@ class LogicService:
         self.rollsLeft = self.STARTING_ROLLS
         self.handsLeft = self.STARTING_HANDS
 
+    def calculateGold(self, playerGold):
+        interest = playerGold // self.interestThreshold
+        stageClearBonus = self.stageClearBonus
+        if self.isNextLevel():
+            # print(self.goldPipsThisLevel)
+            return interest, stageClearBonus, self.goldPipsThisLevel
+        return 0
+
     def subtractHealth(self, num):
         self.rockHealth -= num
         self.DrawService.NUM_SHAPES -= num
         if self.rockHealth <= 0:
             self.rockHealth = 0
             self.DrawService.NUM_SHAPES = 0
+            return 
+        return 0
+    
+    def updateGoldPips(self):
+        for die in self.scoringHandDice:
+            adding = die.calculate()
+            goldAdding = adding % 1
+            goldAdding *= 10 #get val of num
+            goldAdding = int(math.ceil(goldAdding))
+            self.goldPipsThisLevel += goldAdding
+            # print(self.goldPipsThisLevel)
     
     def selectedScoreTotal(self, handMult = True):
         total = 0
         for die in self.scoringHandDice:
-            total += die.calculate()
+            adding = die.calculate()
+            total += int(adding)#truncate decimal
         if handMult:
             total *= self.hand.value[1]
-        return math.ceil(total)
+        return int(math.ceil(total))
     
     def stopScoring(self, SoundService):
         self.subtractHealth(self.recentHandScoreNum)
@@ -53,12 +78,13 @@ class LogicService:
         for die in self.getSelectedDice():
             die.select()
             die.rollDie()
-        self.DrawService.allHands.append(f"{self.recentHandScoreNum} : {self.hand.value[0]}")
-        SoundService.diceRollSound(1)
+        self.DrawService.allRecentHands.append(f"{self.recentHandScoreNum} : {self.hand.value[0]}")
+        SoundService.diceRollSound(rollsLeft=1)
+
 
     def score(self):
         self.startScoring()
-        
+
     #returns False if no hand, returns hand num otherwise
     def startScoring(self):
         if self.rockHealth > 0 and self.scoringHandDice:
@@ -67,9 +93,25 @@ class LogicService:
 
                 self.handsLeft -= 1
                 self.recentHandScoreNum = self.selectedScoreTotal()
-                self.rollsLeft = self.STARTING_ROLLS
+                self.resetRolls()
                 return self.recentHandScoreNum
         return False
+    
+    def startLevel(self, STARTING_ROCKS):
+        self.DrawService.allRecentHands = []
+        self.resetRolls()
+        self.resetHands()
+        self.unselectAll()
+        self.rollDice()
+        self.resetRolls()
+        self.rockHealth = STARTING_ROCKS
+        self.DrawService.resetRocks(self.rockHealth)
+        self.goldPipsThisLevel = 0
+
+    def resetRolls(self):
+        self.rollsLeft = self.STARTING_ROLLS
+    def resetHands(self):
+        self.handsLeft = self.STARTING_HANDS
         
     def addDice(self):
         self.total = 0

@@ -2,19 +2,18 @@ import pygame as pg
 import shapes
 
 class DrawService:
-    transparent = pg.Color(0,0,0,0)
-    shadow = pg.Color(0,0,0,105)
+    transparentColor = pg.Color(0,0,0,0)
+    shadowColor = pg.Color(0,0,0,105)
     scoredColor = pg.Color(100,255,50,34)
     selectedColor = pg.Color(255,255,255,134)
 
     BACKGROUND_COLOR_RANGE_DIFF = 25
 
     dieRadius = 15
-    allHands = []
+    allRecentHands = []
 
     def __init__(self, WIDTH, HEIGHT, NUM_SHAPES = 150, rangeNum = 100):
         self.NUM_SHAPES = NUM_SHAPES
-        self.allHands = []
 
         self.gameFonts = []
 
@@ -40,11 +39,15 @@ class DrawService:
     def deleteRocks(self, num):
         self.BackgroundService.deleteRocks(num)
 
+    def resetRocks(self, rockHealth):
+        self.NUM_SHAPES = rockHealth
+        self.BackgroundService.setRocks(rockHealth)
+
     def setScreen(self, WIDTH, HEIGHT, rangeNum = 100):
         self.gridSpaces = 10
         self.heightGrid = HEIGHT/self.gridSpaces
         self.widthGrid = WIDTH/self.gridSpaces
-        self.shadowLength = int(WIDTH / 400)
+        self.shadowColorLength = int(WIDTH / 400)
         self.marginX = self.widthGrid * .05
         self.marginY = self.heightGrid * .05
 
@@ -74,7 +77,7 @@ class DrawService:
         #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
         dieFaceColor = die.getColor()
 
-        dieFace.fill(self.transparent) #background of surface
+        dieFace.fill(self.transparentColor) #background of surface
 
         if die.isSelected:
             # Apply scaling and outline for selected die
@@ -97,9 +100,9 @@ class DrawService:
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
 
-        #shadow
-        pg.draw.rect(dieFace, self.shadow, dieFace.get_rect(), border_radius=self.dieRadius)
-        self.screen.blit(dieFace, [x + self.shadowLength, y + self.shadowLength])
+        #shadowColor
+        pg.draw.rect(dieFace, self.shadowColor, dieFace.get_rect(), border_radius=self.dieRadius)
+        self.screen.blit(dieFace, [x + self.shadowColorLength, y + self.shadowColorLength])
 
         #background for hovering
         pg.draw.rect(dieFace, pg.Color(200,200,200), dieFace.get_rect(), border_radius=self.dieRadius)
@@ -122,13 +125,17 @@ class DrawService:
         if y is None:
             y = self.levelDiceY
 
-        diceAndRect = []  # (d, dieRect)
+        dieRectsList = []  # To hold tuples of (die, dieRect)
+        pipRectsList = []  # To hold lists of tuples of [(pip, pipRect)]
+
         for die in dice:
             isInScoringDice = scoredDice and die in scoredDice
-            diceAndRect.append(self.drawDie(die, x, y, isInScoringDice))
+            (die, dieRect), pipRects = self.drawDie(die, x, y, isInScoringDice)
+            dieRectsList.append((die, dieRect))
+            pipRectsList.append(pipRects)
             x += self.dieSide + self.dieSpacing
 
-        return diceAndRect
+        return dieRectsList, pipRectsList
 
     def drawDie(self, die, x, y, isInScoringDice = False):
         # check for die attributes, color pips etc..
@@ -136,30 +143,37 @@ class DrawService:
         pipGrid = self.getPipGrid(die, pipGridNum)
 
         dieRect = self.drawDieFace(x, y, die, isInScoringDice)
-        self.drawPips(x, y, pipGrid, die)
+        pipAndRect = self.drawPips(x, y, pipGrid, die)
 
         #for clickable obj
-        return (die, dieRect)
+        return (die, dieRect), pipAndRect
 
     def drawAllDiceFaces(self, playerDice):
         xSpacing = 0
         ySpacing = 0
-        diceAndRect = []
+
+        dieRectsList = []  # To hold tuples of (die, dieRect)
+        pipRectsList = []  # To hold lists of tuples of [(pip, pipRect)]
+
         oldDieSide = self.dieSide
-        self.dieSide /= 1.25
+        self.dieSide /= 1 #draw smaller
+
         for die in playerDice:
             for sideIndex in range(die.getNumSides()):
                 die.curSide = die.sides[sideIndex]
-                diceAndRect.append(self.drawDie(die, self.marginX + xSpacing, self.marginY + ySpacing))
+                (die, dieRect), pipRects = self.drawDie(die, self.marginX + xSpacing, self.marginY + ySpacing)
+                dieRectsList.append((die, dieRect))
+                pipRectsList.append(pipRects)
                 xSpacing += self.dieSide + self.marginX
             xSpacing = 0
             ySpacing += self.dieSide + self.marginY
         self.dieSide = oldDieSide
-        return diceAndRect
+
+        return dieRectsList, pipRectsList
 
     def drawText(self, index, msg, x, y, color = pg.Color(255,255,255), center = False):
         if center:
-            text = self.gameFonts[index].render(str(msg), True, self.shadow)
+            text = self.gameFonts[index].render(str(msg), True, self.shadowColor)
             rect = text.get_rect(center = (self.WIDTH//2 + 2 + x, self.HEIGHT//2 + 2 + y))
             self.screen.blit(text, rect)
 
@@ -167,7 +181,7 @@ class DrawService:
             rect = text.get_rect(center = (self.WIDTH//2 + x, self.HEIGHT//2 + y))
             self.screen.blit(text, rect)
         else:
-            img = self.gameFonts[index].render(str(msg), True, self.shadow)
+            img = self.gameFonts[index].render(str(msg), True, self.shadowColor)
             self.screen.blit(img, (x+2,y+2))
             img = self.gameFonts[index].render(str(msg), True, color)
             self.screen.blit(img, (x,y))
@@ -179,13 +193,13 @@ class DrawService:
 
     def drawLevelText(self, LogicService):
         #game info
+        self.drawText(2,f"{LogicService.rockHealth} rocks",                              self.marginX,self.heightGrid + self.marginY, center=True)
         self.drawText(1,f"{LogicService.rollsLeft} rolls", self.marginX,self.marginY, center=True)
         self.drawText(1,f"{LogicService.handsLeft} hands", self.marginX,self.heightGrid * .5 + self.marginY, center=True)
-        self.drawText(1,f"{LogicService.rockHealth} rocks",                              self.marginX,self.heightGrid + self.marginY, center=True)
 
     def drawPreviousHands(self):
         yNum = 9.5
-        for strHand in self.allHands:
+        for strHand in self.allRecentHands:
             self.drawText(1, f"{strHand}", self.marginX, self.heightGrid * yNum - self.marginY)
             yNum -= .5
 
@@ -205,7 +219,7 @@ class DrawService:
 
         pipToDraw = pg.Surface((pipSize, pipSize), pg.SRCALPHA)
 
-        pipToDraw.fill(self.transparent) #background of pip
+        pipToDraw.fill(self.transparentColor) #background of pip
 
         pipY = y - pipSize
         pipX = x
@@ -213,6 +227,7 @@ class DrawService:
         #iterates through grid, draws a pip if 0 isnt found
         i = 0
         pipRadius = int(self.dieRadius / 2)
+        pipRect = []
         for row in pipGrid:
             pipX = x
             for space in row:
@@ -227,18 +242,20 @@ class DrawService:
                                        scaled_pip + outline_thickness,
                                        scaled_pip + outline_thickness)
                     
-                    pg.draw.rect(self.screen, self.shadow, outline_rect, border_radius=pipRadius)
+                    pg.draw.rect(self.screen, self.shadowColor, outline_rect, border_radius=pipRadius)
                     # self.screen.blit(pipToDraw, [pipX, pipY])
                     
-                    pipToDraw.fill(self.transparent)  # Reset the `pipToDraw` surface
+                    pipToDraw.fill(self.transparentColor)  # Reset the `pipToDraw` surface
                     pg.draw.rect(pipToDraw, sidePips[i].getPipColor(), pipToDraw.get_rect(), border_radius=pipRadius)
                     self.screen.blit(pipToDraw, [pipX, pipY])
 
+                    pipRect.append((sidePips[i], outline_rect))
                     i += 1
                 # self.screen.blit(pipToDraw, [pipX, pipY])
                 pipX += pipSize
             pipY += pipSize
-
+        return pipRect
+            
     def getPipGrid(self, d, pipGridNum):
         numPips = d.curSide.getNum()
         pipGrid = [[0]*pipGridNum for _ in range(pipGridNum)] #7x7 array
@@ -277,3 +294,101 @@ class DrawService:
                 pipGrid[4] = [0,1,0,1,0,1,0]
                 pipGrid[6] = [0,1,0,1,0,1,0]
         return pipGrid
+    
+    buttons = []
+    def setButtons(self, text, vertical=False):
+        num_buttons = len(text)
+        button_width = self.WIDTH / self.gridSpaces * 2
+        button_height = self.HEIGHT / self.gridSpaces
+        spacing = 10  # Adjust spacing as needed
+        
+        # Calculate total dimensions and starting positions
+        if vertical:
+            total_height = num_buttons * button_height + (num_buttons - 1) * spacing
+            startY = (self.HEIGHT - total_height) / 2 + button_height / 2
+            centerX = self.WIDTH / 2 + self.dieSide
+        else:
+            total_width = num_buttons * button_width + (num_buttons - 1) * spacing
+            startX = (self.WIDTH - total_width) / 2 + button_width / 2
+            centerY = self.HEIGHT / 4 * 3
+        
+        buttonColor = pg.Color(200, 200, 200, 255)
+        font = self.gameFonts[2]
+        self.buttons = []  # Reset buttons list
+
+        for string in text:
+            if vertical:
+                newButton = Button(centerX, startY, button_width, button_height, buttonColor, string, font, self.screen, shadowColor=self.shadowColor, shadowOffset=self.shadowColorLength, borderRadius=self.dieRadius)
+                startY += button_height + spacing  # Move to the next position, including spacing
+            else:
+                newButton = Button(startX, centerY, button_width, button_height, buttonColor, string, font, self.screen, shadowColor=self.shadowColor, shadowOffset=self.shadowColorLength, borderRadius=self.dieRadius)
+                startX += button_width + spacing  # Move to the next position, including spacing
+            
+            self.buttons.append(newButton)
+
+        return self.buttons
+        
+
+    def drawButtons(self, buttons):
+        buttonRect = []
+        for button in buttons:
+            buttonRect.append(button.draw())
+        return buttonRect
+
+class Button:
+    def __init__(self, centerX, centerY, width, height, color, text, font, screen, shadowColor, shadowOffset, borderRadius, action = None, fontColor = pg.Color(255,255,255,255)):
+        self.centerX = centerX
+        self.centerY = centerY
+        self.width = width
+        self.height = height
+        self.borderRadius = borderRadius
+        self.color = color
+        self.text = text
+        self.font = font
+        self.screen = screen
+        self.shadowColor = shadowColor
+        self.fontColor = fontColor
+        self.shadowOffset = shadowOffset
+        self.rect = pg.Rect(0, 0, width, height)
+        self.rect.center = (centerX, centerY)
+        self.textSurface = self.font.render(self.text, True, self.fontColor)
+        self.textShadowSurface = self.font.render(self.text, True, self.shadowColor)
+        self.isClicked = False
+        self.action = action
+
+    def click(self):
+        self.isClicked = not self.isClicked
+
+    def setAction(self, action):
+        self.action = action
+
+    def updateText(self, newText):
+        self.text = newText
+
+    def draw(self):
+        buttonColor = self.color
+        if self.isClicked:
+            buttonColor = self.shadowColor
+            
+        # Draw button shadow
+        shadowRect = self.rect.copy()
+        shadowRect.topleft = (self.rect.left + self.shadowOffset, self.rect.top + self.shadowOffset)
+        shadowSurface = pg.Surface((self.rect.width, self.rect.height), pg.SRCALPHA)
+        pg.draw.rect(shadowSurface, self.shadowColor, shadowSurface.get_rect(), border_radius=self.borderRadius)
+        self.screen.blit(shadowSurface, shadowRect.topleft)
+
+        # Draw button
+        buttonSurface = pg.Surface((self.rect.width, self.rect.height), pg.SRCALPHA)
+        pg.draw.rect(buttonSurface, buttonColor, buttonSurface.get_rect(), border_radius=self.borderRadius)
+        self.screen.blit(buttonSurface, self.rect.topleft)
+
+        # Draw text shadow
+        textShadowRect = self.textShadowSurface.get_rect(center=self.rect.center)
+        textShadowRect.topleft = (textShadowRect.left + self.shadowOffset // 2, textShadowRect.top + self.shadowOffset // 2)
+        self.screen.blit(self.textShadowSurface, textShadowRect)
+
+        # Draw text
+        textRect = self.textSurface.get_rect(center=self.rect.center)
+        self.screen.blit(self.textSurface, textRect)
+
+        return self, self.rect

@@ -47,23 +47,23 @@ class Side:
         self.pips = []
         self.mod = None
         self.color = color
+        self.baseScore = 1
         for _ in range(value):
             self.pips.append(Pip())
     
     def getCalculate(self):
         score = 0
         for pip in self.pips:
+            score += self.baseScore
             match pip.mod:
                 case Mod.ATK:
-                    score += 2
-                    if self.mod == pip.mod:
-                        score += 1
+                    score += 1
                 # case Mod.DEF:
                 #     break
-                # case Mod.GOLD:
-                #     break
+                case Mod.GOLD:
+                    score += .1
                 case Mod.BASE:
-                    score += 1
+                    score += 0
         return score
     
     def getPips(self):
@@ -79,10 +79,17 @@ class Side:
         
 class Pip:
     def __init__(self):
+        self.isHovered = False
         self.mod = Mod.BASE
 
     def getPipColor(self):
         return self.mod.value
+    
+    def addATKMod(self):
+        self.mod = Mod.ATK
+
+    def addGOLDMod(self):
+        self.mod = Mod.GOLD
 
 class Mod(Enum):
     ATK = pg.Color(255,0,0,230)

@@ -7,14 +7,22 @@ class Background:
         #Adjust to set bounds for shapes bouncing
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
+        self.colorRangeNum = colorRangeNum
 
-        #makes NUM_SHAPES to use with speed (.5)
-        self.shapes = [self.newShape(.2, colorRangeNum) for _ in range(NUM_SHAPES)]
-        self.oneXthOfRocks = oneXthOfRocks
         #rocks that change colors
-        self.numShapesToChange = len(self.shapes) // oneXthOfRocks
+        self.oneXthOfRocks = oneXthOfRocks
+
+        self.setRocks(NUM_SHAPES)
+
         self.changingShapesArray = []
         self.changingShapes = []
+
+    def setRocks(self, NUM_SHAPES):
+        #makes NUM_SHAPES to use with speed (.5)
+        self.shapes = [self.newShape(.2, self.colorRangeNum) for _ in range(NUM_SHAPES)]
+        #rocks that change colors
+        self.numShapesToChange = len(self.shapes) // self.oneXthOfRocks
+        
 
     def runBackground(self, screen):
         for shape in self.shapes:

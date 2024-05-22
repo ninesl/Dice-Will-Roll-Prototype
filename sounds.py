@@ -18,6 +18,9 @@ class SoundService:
             "big":   pg.mixer.Sound("assets/audio/hit/bigHit.wav"),
             "none":   pg.mixer.Sound("assets/audio/hit/noHit.wav")
         }
+        self.shopDict = {
+            "ding": pg.mixer.Sound("assets/audio/shop/ding.wav")
+        }
 
     def playMusic(self):
         self.music.play(-1)

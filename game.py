@@ -54,41 +54,44 @@ print(" ⚀ ⚁ ⚂ ⚃ ⚄ ⚅")
 # # replaceKeyBind(pg.K_SPACE, pg.K_r)
 
 keyBinds = {
-    "level" : {
-        pg.K_SPACE: "roll",
-        1: "hold",
+    "stage_level" : {
         pg.K_ESCAPE: "quit",
-        pg.K_q: "score",
+        # pg.K_SPACE: "roll",
+        1: "level_select",
+        # pg.K_q: "score",
         pg.K_p: "reset",
         pg.K_o: "harder",
-        pg.K_w: "shop",
-        pg.K_r: "newdie"
+        # pg.K_w: "stage_shop",
+        # pg.K_r: "newdie"
     },
-    "shop" : {
+    "stage_shop" : {
         pg.K_ESCAPE: "quit",
-        1: "hold",
-        pg.K_e: "level",
-        pg.K_r: "newdie"
+        1: "shop_select",
+        # pg.K_e: "stage_level",
+        # pg.K_r: "newdie"
     }
 }
 
 #everything
 controls = {
     "roll"  :gc.rollDice,
-    "hold"  :gc.selectDie,
+    "level_select"  :gc.levelSelect,
     "quit"  :gc.quitGame,
     "score" :gc.scoreDice,
     "reset" :gc.resetLevel,
     "harder":gc.harderLevel,
-    "shop"  :gc.goToShop,
-    "level" :gc.goToLevel,
-    "newdie":gc.newDice
+    "stage_shop"  :gc.goToShop,
+    "stage_level" :gc.goToLevel,
+    "newdie":gc.newDice,
+    "shop_select":gc.shopSelect
 }
 
-GAME_STATE = "level"
+GAME_STATE = "stage_level"
 currentAction = ""
+gc.goToLevel()
 # fpsCount = 1
 while gc.GOING:
+    GAME_STATE = gc.getCurrentState()
 
     for event in pg.event.get():
         try:
@@ -107,15 +110,13 @@ while gc.GOING:
                     currentAction = keyBinds[GAME_STATE][event.key]
                     controls[currentAction]()
 
-                if currentAction in keyBinds:
-                    GAME_STATE = currentAction
         except KeyError:
             pass  # Explicitly doing nothing
     gc.gameLoop()
 
 
-    fps = int(clock.get_fps())
-    gc.DrawService.drawText(1, f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05)
+    # fps = int(clock.get_fps())
+    # gc.DrawService.drawText(1, f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05)
     pg.display.update()
     clock.tick(60)
     # clock.tick_busy_loop(fps)

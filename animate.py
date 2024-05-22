@@ -14,6 +14,14 @@ class AnimateService:
         self.scoreStringIndex = 0
         self.scoreIndex = 0
         self.totalScore = -1
+
+    def updateGold(self, playerGold, goldToAdd, WIDTH, HEIGHT):
+        if goldToAdd > 0:
+            goldToAdd -= 1
+            playerGold += 1
+            self.SoundService.shopDict["ding"].play()
+
+        return goldToAdd, playerGold
     
     def selectedScoreString(self, scoringHandDice):
         pipChars = "⚀⚁⚂⚃⚄⚅"
@@ -33,6 +41,7 @@ class AnimateService:
 
                 if not scoreMatches:
                     curDieCalcNum = LogicService.scoringHandDice[self.scoreIndex].calculate()
+                    curDieCalcNum = int(curDieCalcNum)
                     self.scoreString[self.scoreStringIndex] = f"{curDieCalcNum} "
                     self.DrawService.deleteRocks(curDieCalcNum)
 
