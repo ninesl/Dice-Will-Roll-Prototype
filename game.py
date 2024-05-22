@@ -28,8 +28,6 @@ gc = gamecontroller.GameController(monitor, clock, fps)
 #     RESET = gc.resetLevel,
 #     HARDER= gc.harderLevel
 
-
-
 print("loading", end = ".")
 while not gc.isFinishedLoading():
     print(".", end = "")
@@ -59,8 +57,8 @@ keyBinds = {
         # pg.K_SPACE: "roll",
         1: "level_select",
         # pg.K_q: "score",
-        pg.K_p: "reset",
-        pg.K_o: "harder",
+        # pg.K_p: "reset",
+        # pg.K_o: "harder",
         # pg.K_w: "stage_shop",
         # pg.K_r: "newdie"
     },
