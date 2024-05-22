@@ -45,7 +45,8 @@ class Die:
 class Side:
     def __init__(self, value, color):
         self.pips = []
-        self.mod = None
+        self.mods = []
+        self.originalColor = color
         self.color = color
         self.baseScore = 1
         for _ in range(value):
@@ -58,10 +59,12 @@ class Side:
             match pip.mod:
                 case Mod.ATK:
                     score += 1
+                    if self.hasATKMod():
+                        score += 1
                 # case Mod.DEF:
                 #     break
                 case Mod.GOLD:
-                    score += .1
+                    score += 0
                 case Mod.BASE:
                     score += 0
         return score
@@ -73,6 +76,29 @@ class Side:
     def getNum(self):
         return len(self.pips)
     
+    def addATKMod(self):
+        self.mods.append(Mod.ATK)
+        self.updateColor()
+
+    def addGOLDMod(self):
+        self.mods.append(Mod.GOLD)
+        self.updateColor()
+
+    def hasGOLDMod(self):
+        return Mod.GOLD in self.mods
+    def hasATKMod(self):
+        return Mod.ATK in self.mods
+    
+    def updateColor(self):
+        if self.hasGOLDMod() and self.hasATKMod():
+            self.color = pg.Color(255,112,34)#gold/red
+        elif self.hasGOLDMod():
+            self.color = Mod.GOLD.value
+        elif self.hasATKMod():
+            self.color = Mod.ATK.value
+        elif len(self.mods) == 0:
+            self.color = self.originalColor
+
     # USE Mod ATK,DEF,GOLD etc
     # def setModSide(self, modEnum):
     #     self.modEnum = modEnum
@@ -90,6 +116,9 @@ class Pip:
 
     def addGOLDMod(self):
         self.mod = Mod.GOLD
+
+    def isGOLDMod(self):
+        return self.mod == Mod.GOLD
 
 class Mod(Enum):
     ATK = pg.Color(255,0,0,230)

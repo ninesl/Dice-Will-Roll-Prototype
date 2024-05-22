@@ -56,12 +56,11 @@ class LogicService:
     
     def updateGoldPips(self):
         for die in self.scoringHandDice:
-            adding = die.calculate()
-            goldAdding = adding % 1
-            goldAdding *= 10 #get val of num
-            goldAdding = int(math.ceil(goldAdding))
-            self.goldPipsThisLevel += goldAdding
-            # print(self.goldPipsThisLevel)
+            for pip in die.curSide.getPips():
+                if pip.isGOLDMod():
+                    self.goldPipsThisLevel += 1
+                if die.curSide.hasGOLDMod():
+                    self.goldPipsThisLevel += 1
     
     def selectedScoreTotal(self, handMult = True):
         total = 0

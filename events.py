@@ -29,6 +29,12 @@ class EventService:
                 if rect.collidepoint(self.pos):
                     return pip
                 
+    def selectSide(self, sideRect):
+        self.update_pos()
+        for side, rect in sideRect:
+            if rect.collidepoint(self.pos):
+                return side
+                
     def selectButton(self, buttonRect):
         self.update_pos()
         for button, rect in buttonRect:

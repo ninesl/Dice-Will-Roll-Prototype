@@ -58,12 +58,21 @@ class GameController:
         self.LogicService   = logic.LogicService(self.playerDice, self.DrawService)
 
     def newDice(self):
-        self.playerDice.append(dice.Die(6, 
-                                        pg.Color(rand.randint(self.rangeDieMin, self.rangeDieMax), 
-                                                 rand.randint(self.rangeDieMin, self.rangeDieMax), 
-                                                 rand.randint(self.rangeDieMin, self.rangeDieMax))))
-        self.rangeDieMin -= 15
-        self.rangeDieMax -= 15
+        if self.rangeDieMin <= 0:
+            self.rangeDieMin = 0
+        if self.rangeDieMax <= 15:
+            self.rangeDieMax = 15
+
+        randRGBVals = [ rand.randint(self.rangeDieMin, self.rangeDieMax), 
+                        rand.randint(0, self.rangeDieMax), 
+                        rand.randint(int(self.rangeDieMin/2), self.rangeDieMax)]
+
+        dieColor = pg.Color(rand.choice(randRGBVals),
+                            rand.choice(randRGBVals),
+                            rand.choice(randRGBVals))
+        self.playerDice.append(dice.Die(6, dieColor))
+        self.rangeDieMin -= rand.randint(15,25)
+        self.rangeDieMax -= rand.randint(5,15)
 
     numStartDice = 1
     def setDice(self):
@@ -75,7 +84,7 @@ class GameController:
             die.rollDie()
 
     def levelSelect(self):
-        d = self.EventService.holdDie(self.dicePipRect[0])
+        d = self.EventService.holdDie(self.dicePipSideRect[0])
         if d:
             self.SoundService.selectDiceSound(d.isSelected)
 
@@ -93,8 +102,8 @@ class GameController:
         self.LogicService.rollDice()
 
     def scoreDice(self):
-        self.LogicService.score()
         self.LogicService.updateGoldPips()
+        self.LogicService.score()
 
     def resetLevel(self):
         self.LogicService.startLevel(self.STARTING_ROCKS)
@@ -107,24 +116,29 @@ class GameController:
             self.BACKGROUND_COLOR_RANGE = self.DrawService.BACKGROUND_COLOR_RANGE_DIFF
         self.STARTING_ROCKS = int(self.STARTING_ROCKS * 1.25)
 
+    goldPipsThisLevel = 0
     def levelLoop(self):
         #returns list of (die, rect) for EventService
-        self.dicePipRect = self.DrawService.drawDice(self.playerDice, self.LogicService.scoringHandDice)
+        self.dicePipSideRect = self.DrawService.drawDice(self.playerDice, self.LogicService.scoringHandDice)
 
-        self.EventService.dieHovered(self.dicePipRect[0])
+        self.EventService.dieHovered(self.dicePipSideRect[0])
         self.LogicService.findHand()
         self.DrawService.drawPreviousHands()
 
         self.scoreButtonRect = self.DrawService.drawButtons(self.levelButtons)
 
         if self.LogicService.isNextLevel():
-            self.interest, self.goldToAdd, self.goldPipsThisLevel = self.LogicService.calculateGold(self.playerGold)
-
+            self.interest, self.stageClearBonus, self.goldPipsThisLevel = self.LogicService.calculateGold(self.playerGold)
+            self.goldToAdd = self.interest + self.goldPipsThisLevel + self.stageClearBonus + self.LogicService.handsLeft
+            
             self.DrawService.drawText(2, "Level Completed!", 0,-self.DrawService.heightGrid * 1.5, center=True)
-            self.DrawService.drawText(1, f"stage clear: {self.goldToAdd} gold", 0,-self.DrawService.heightGrid // 2, center=True)
-            self.DrawService.drawText(1, f"gold pips: {self.goldPipsThisLevel} gold", 0,0, center=True)
-            self.DrawService.drawText(1, f"1g for every 5g owned - interest: {self.interest} gold", 0,self.DrawService.heightGrid // 2, center=True)
-            self.DrawService.drawText(1, f"total gold gained: {self.interest + self.goldPipsThisLevel + self.goldToAdd} gold", 0,self.DrawService.heightGrid, center=True)
+
+            self.DrawService.drawText(1, f"stage clear:                ${self.stageClearBonus}",                     0,-self.DrawService.heightGrid // 2, center=True)
+            self.DrawService.drawText(1, f"gold pips:                  ${self.goldPipsThisLevel}",               0,0, center=True)
+            self.DrawService.drawText(1, f"$1 interest every $5 owned: ${self.interest}",       0,self.DrawService.heightGrid // 2, center=True)
+            self.DrawService.drawText(1, f"hands left:                 ${self.LogicService.handsLeft}",         0,self.DrawService.heightGrid, center=True)
+            self.DrawService.drawText(1, f"-------------------------------",                   0,self.DrawService.heightGrid * 1.25, center=True)
+            self.DrawService.drawText(1, f"total gained:               ${self.goldToAdd}",                   0,self.DrawService.heightGrid * 1.5, center=True)
             
             self.levelButtons = self.otherButtons
             return
@@ -133,10 +147,9 @@ class GameController:
         self.AnimateService.animateScoringHand(self.LogicService)
 
     def shopLoop(self):
-        self.goldToAdd += self.goldPipsThisLevel
         self.goldPipsThisLevel = 0
         self.goldToAdd, self.playerGold = self.AnimateService.updateGold(self.playerGold, self.goldToAdd, self.WIDTH, self.HEIGHT)
-        self.dicePipRect = self.DrawService.drawAllDiceFaces(self.playerDice) #pips
+        self.dicePipSideRect = self.DrawService.drawAllDiceFaces(self.playerDice) #pips
         self.shopButtonRect = self.DrawService.drawButtons(self.shopButtons)
 
     modGoldYes = None
@@ -147,17 +160,26 @@ class GameController:
     diePrice = 5
     def shopSelect(self):
         startGold = self.playerGold
-        pip = self.EventService.selectPip(self.dicePipRect[1])
-        if pip:
+        pip = self.EventService.selectPip(self.dicePipSideRect[1])
+        side = self.EventService.selectSide(self.dicePipSideRect[2])
+        objAddingMod = None
+        if side:
+            objAddingMod = side
+        if pip: #pip rect above side
+            objAddingMod = pip
+        if objAddingMod:
             if self.playerGold > 0 and self.modGoldYes != None:
                 #TODO other system
                 if self.modGoldYes:
-                    pip.addGOLDMod()
+                    print(f"{type(objAddingMod)} gold")
+                    objAddingMod.addGOLDMod()
                     self.playerGold -= self.goldModPrice
                 else:
-                    pip.addATKMod()
+                    print(f"{type(objAddingMod)} atk")
+                    objAddingMod.addATKMod()
                     self.playerGold -= self.atkModPrice
                 self.modGoldYes = None
+                objAddingMod = None
         button = self.EventService.selectButton(self.shopButtonRect)
         if button:
             button.action()
@@ -173,7 +195,7 @@ class GameController:
 
     def gameLoop(self):
         self.DrawService.resetFrame()
-        self.DrawService.drawText(3, f"{self.playerGold} gold", 0,self.HEIGHT//2 - self.DrawService.marginY * 5, color=pg.Color(218,165,32), center=True)
+        self.DrawService.drawText(2, f"${self.playerGold}", 0,self.HEIGHT//2 - self.DrawService.marginY * 15, color=pg.Color(218,165,32), center=True)
         match self.currentState:
             case LevelState.LEVEL:
                 self.levelLoop()
@@ -184,26 +206,29 @@ class GameController:
         if self.playerGold - self.diePrice >= 0:
             self.playerGold -= self.diePrice
             self.newDice()
+        self.diePrice += 5
             
     def buyRoll(self):
         if self.playerGold - self.rollPrice >= 0:
             self.playerGold -= self.rollPrice
             self.LogicService.STARTING_ROLLS += 1
+        self.rollPrice += 5
 
     def buyHand(self):
         if self.playerGold -   self.handPrice >= 0:
             self.playerGold -= self.handPrice
             self.LogicService.STARTING_HANDS += 1
+        self.handPrice += 10
 
     def goToShop(self):
         self.LogicService.unselectAll()
         self.harderLevel() #set up next level
         self.goldToAdd += self.interest
-        buttonTexts =[f"{self.diePrice}g new die",
-                      f"{self.handPrice}g another hand",
-                      f"{self.rollPrice}g another roll",
-                      f"{self.goldModPrice}g gold pip",
-                      f"{self.atkModPrice}g atk pip",
+        buttonTexts =[f"${self.diePrice} new □",
+                      f"${self.handPrice} another hand",
+                      f"${self.rollPrice} another roll",
+                      f"${self.goldModPrice} gold mod",
+                      f"${self.atkModPrice} atk mod",
                       f"next level"]
         self.shopButtons = self.DrawService.setButtons(buttonTexts, vertical = True)#,"1g +1 score pip","1g +1 gold pip"])
         self.shopButtons[0].setAction(self.buyDie)

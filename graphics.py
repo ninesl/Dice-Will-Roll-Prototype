@@ -75,7 +75,6 @@ class DrawService:
         dieFace = pg.Surface((self.dieSide, self.dieSide), pg.SRCALPHA)
         
         #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
-        dieFaceColor = die.getColor()
 
         dieFace.fill(self.transparentColor) #background of surface
 
@@ -109,7 +108,7 @@ class DrawService:
         self.screen.blit(dieFace, [x, y])
 
         #die face
-        pg.draw.rect(dieFace, dieFaceColor, dieFace.get_rect(), border_radius=self.dieRadius)
+        pg.draw.rect(dieFace, die.curSide.color, dieFace.get_rect(), border_radius=self.dieRadius)
         self.screen.blit(dieFace, [x, y])
 
         return dieFace.get_rect().move(x,y) #return rect
@@ -154,6 +153,7 @@ class DrawService:
 
         dieRectsList = []  # To hold tuples of (die, dieRect)
         pipRectsList = []  # To hold lists of tuples of [(pip, pipRect)]
+        sideRectsList = [] # To hold lists of tuples of (side, sideRect)
 
         oldDieSide = self.dieSide
         self.dieSide /= 1 #draw smaller
@@ -164,12 +164,13 @@ class DrawService:
                 (die, dieRect), pipRects = self.drawDie(die, self.marginX + xSpacing, self.marginY + ySpacing)
                 dieRectsList.append((die, dieRect))
                 pipRectsList.append(pipRects)
+                sideRectsList.append((die.curSide, dieRect))
                 xSpacing += self.dieSide + self.marginX
             xSpacing = 0
             ySpacing += self.dieSide + self.marginY
         self.dieSide = oldDieSide
 
-        return dieRectsList, pipRectsList
+        return dieRectsList, pipRectsList, sideRectsList
 
     def drawText(self, index, msg, x, y, color = pg.Color(255,255,255), center = False):
         if center:
