@@ -15,13 +15,13 @@ class DiceHand(Enum):
     FIVE_OF_A_KIND  = ["Five of a Kind", 7.5]
     #weird hands
     #6 dice
-    SIX_OF_A_KIND   = ["Six of a Kind", 12.5]
+    SIX_OF_A_KIND   = ["Six of a Kind", 10]
     STRAIGHT_LARGER = ["Larger Straight", 12.5] #6 range 
-    TWO_THREE_OF_A_KIND= ["Three of a Kinds", 12.5]
+    TWO_THREE_OF_A_KIND= ["Three's a crowd", 12.5]
     #7 dice
-    STRAIGHT_LARGEST= ["Largest Straight", 15] #7 range
-    FULLER_HOUSE   = ["Fuller House", 12.5]
-    SEVEN_OF_A_KIND   = ["Seven of a Kind", 12.5]
+    STRAIGHT_LARGEST= ["Ultra Straight", 15] #7 range
+    FULLER_HOUSE   = ["Fullest House", 12.5]
+    SEVEN_OF_A_KIND   = ["Seven????", 15]
 
 class LogicService:
     STARTING_ROLLS = 2

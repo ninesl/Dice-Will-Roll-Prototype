@@ -14,7 +14,7 @@ class GameController:
     MAX_DICE = 7
     GOING = True
 
-    playerGold = 4
+    playerGold = 400000000000000
     goldToAdd = 0
     interest = 0
 
@@ -133,7 +133,7 @@ class GameController:
         self.LogicService.startLevel(self.STARTING_ROCKS)
     
     def harderLevel(self):
-        self.BACKGROUND_COLOR_RANGE -= rand.randint(10,20)
+        self.BACKGROUND_COLOR_RANGE -= rand.randint(5,15)
         if self.BACKGROUND_COLOR_RANGE <= self.DrawService.BACKGROUND_COLOR_RANGE_DIFF:
             self.BACKGROUND_COLOR_RANGE = self.DrawService.BACKGROUND_COLOR_RANGE_DIFF
         self.STARTING_ROCKS = int(self.STARTING_ROCKS * 1.5)
@@ -143,7 +143,7 @@ class GameController:
     goldPipsThisLevel = 0
     def levelLoop(self):
         self.goldPipsThisLevel = self.LogicService.goldPipsThisLevel
-        self.gameMsg = f"{self.goldPipsThisLevel} gold pips this level"
+        self.gameMsg = f"{self.goldPipsThisLevel} gold pips this level | left click: hold _ right click: preview"
         #returns list of (die, rect) for EventService
         self.dicePipSideRect = self.DrawService.drawDice(self.playerDice, self.LogicService.scoringHandDice)
 
@@ -164,9 +164,9 @@ class GameController:
                 self.levelButtons = self.otherButtons
             return
         
-        if self.LogicService.handsLeft == 0 and self.LogicService.rockHealth > 0 and not self.LogicService.isScoring:
+        if (self.LogicService.handsLeft == 0 and self.LogicService.rockHealth > 0 and not self.LogicService.isScoring) or len(self.playerDice) <= 0:
             self.levelButtons = []
-            if self.AnimateService.gameOverAnimation():
+            if self.AnimateService.gameOverAnimation(len(self.playerDice)):
                 self.levelButtons = self.gameOverButtons
             return
         

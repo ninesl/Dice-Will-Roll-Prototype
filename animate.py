@@ -80,14 +80,29 @@ class AnimateService:
                 self.levelCompleteIndex += 1
                 self.startingFrame = None
 
-    def gameOverAnimation(self):
-            if self.gameOverIndex > 0:
-                self.DrawService.drawText(3, f"GAME",   0,-self.DrawService.heightGrid, center=True)
-            if self.gameOverIndex > 1:
-                self.DrawService.drawText(3, f"OVER",   0,-self.DrawService.heightGrid // 2, center=True)
-            if self.gameOverIndex > 2:
-                return True
+    def gameOverAnimation(self, numDice = None):
+            if self.gameOverIndex >= 0:
+                self.DrawService.drawText(3, f"GAME",   0,-self.DrawService.    heightGrid, center=True)
+            if self.gameOverIndex >= 1:
+                self.DrawService.drawText(3, f"OVER",   0,-self.DrawService.    heightGrid // 2, center=True)
+
+            if numDice == 0:
+                if self.gameOverIndex == 2:
+                    self.DrawService.drawText(1, f"Bro.",   0,self.DrawService.heightGrid // 2, center=True)
+                if self.gameOverIndex == 3:
+                    self.DrawService.drawText(1, f"Bro..",   0,self.DrawService.heightGrid // 2, center=True)
+                if self.gameOverIndex > 3:
+                    self.DrawService.drawText(1, f"Bro...",   0,self.DrawService.heightGrid // 2, center=True)
+                if self.gameOverIndex > 4:
+                    self.DrawService.drawText(1, f"no dice??",   0,self.DrawService.heightGrid, center=True)
+                if self.gameOverIndex > 5:
+                    return True
+            else:
+                if self.gameOverIndex > 2:
+                    return True
+
             if not self.startingFrame:#updating info
+                print(self.gameOverIndex)
                 self.startingFrame = pg.time.get_ticks()
                 self.SoundService.hitDict["none"].play()
                 #play sound
