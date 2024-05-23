@@ -14,7 +14,7 @@ class GameController:
     MAX_DICE = 7
     GOING = True
 
-    playerGold = 400000000000000
+    playerGold = 4000000
     goldToAdd = 0
     interest = 0
 

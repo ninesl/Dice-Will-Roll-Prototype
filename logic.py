@@ -14,10 +14,12 @@ class DiceHand(Enum):
     FOUR_OF_A_KIND  = ["Four of a Kind", 5]
     FIVE_OF_A_KIND  = ["Five of a Kind", 7.5]
     #weird hands
+    SNAKE_EYES      = ["Snake Eyes",     2]
     #6 dice
+    THREE_PAIR      = ["Three Pair",   7.5]
     SIX_OF_A_KIND   = ["Six of a Kind", 10]
     STRAIGHT_LARGER = ["Larger Straight", 12.5] #6 range 
-    TWO_THREE_OF_A_KIND= ["Three's a crowd", 12.5]
+    TWO_THREE_OF_A_KIND= ["Three's a Crowd", 12.5]
     #7 dice
     STRAIGHT_LARGEST= ["Ultra Straight", 15] #7 range
     FULLER_HOUSE   = ["Fullest House", 12.5]
@@ -161,7 +163,7 @@ class LogicService:
                     return range(start, start + length)
             return None
         
-        #Hand calculations. Figures out the hand and then sets scoringHandDice depending on the hand
+        #Hand calculations. Figures out the hand and then sets scoringHandDice depending on the hand. Weighted by hand rank
         if not handDicePips:
             self.hand = DiceHand.NO_HAND
             self.scoringHandDice = []
@@ -194,6 +196,10 @@ class LogicService:
             self.hand = DiceHand.FIVE_OF_A_KIND
             target_value = max(count, key=count.get)
             self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == target_value]
+        elif values.count(2) == 3:
+            self.hand = DiceHand.THREE_PAIR
+            pairs = [k for k, v in count.items() if v == 2]
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in pairs]
         elif 4 in values:
             self.hand = DiceHand.FOUR_OF_A_KIND
             target_value = max(count, key=count.get)
@@ -220,9 +226,13 @@ class LogicService:
             pairs = [k for k, v in count.items() if v == 2]
             self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in pairs]
         elif 2 in values:
-            self.hand = DiceHand.ONE_PAIR
             pair = max(count, key=count.get)
-            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == pair]
+            if pair == 1:  # Check if the pair is Snake Eyes
+                self.hand = DiceHand.SNAKE_EYES
+                self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == pair]
+            else:
+                self.hand = DiceHand.ONE_PAIR
+                self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == pair]
         elif 1 in values:
             self.hand = DiceHand.HIGH_DIE
             self.scoringHandDice = [max(self.getSelectedDice(), key=lambda die: die.curSide.getNum())]
