@@ -56,6 +56,7 @@ keyBinds = {
         pg.K_ESCAPE: "quit",
         # pg.K_SPACE: "roll",
         1: "level_select",
+        3: "hover_select",
         # pg.K_q: "score",
         # pg.K_p: "reset",
         # pg.K_o: "harder",
@@ -80,6 +81,7 @@ controls = {
     "harder":gc.harderLevel,
     "stage_shop"  :gc.goToShop,
     "stage_level" :gc.goToLevel,
+    "hover_select":gc.drawDieInfoFaces,
     "newdie":gc.newDice,
     "shop_select":gc.shopSelect
 }

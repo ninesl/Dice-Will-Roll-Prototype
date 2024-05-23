@@ -7,7 +7,10 @@ class AnimateService:
         self.clock = clock
         self.SoundService = SoundService
         self.fps = fps * 10 #fps miliseconds
+        self.resetAnimationTrackers()
 
+
+    def resetAnimationTrackers(self):
         self.startingFrame = None
         self.scoreString = ""
 
@@ -15,21 +18,83 @@ class AnimateService:
         self.scoreIndex = 0
         self.totalScore = -1
 
-    def updateGold(self, playerGold, goldToAdd, WIDTH, HEIGHT):
-        if goldToAdd > 0:
-            goldToAdd -= 1
-            playerGold += 1
-            self.SoundService.shopDict["ding"].play()
+        self.levelCompleteIndex = 0
+        self.gameOverIndex = 0
 
+
+    def updateGold(self, playerGold, goldToAdd):
+        incr = 1
+        tempGold = goldToAdd
+        while tempGold > 30:#counts by 1 at 30
+            tempGold /= 10
+            incr *= 10 #ups every tens place
+        
+
+        if goldToAdd > 0:
+            goldToAdd -=  incr
+            playerGold += incr
+            self.SoundService.shopDict["ding"].play()
+            # print(goldToAdd, playerGold)
         return goldToAdd, playerGold
     
     def selectedScoreString(self, scoringHandDice):
-        pipChars = "⚀⚁⚂⚃⚄⚅"
+        pipChars = "⚀⚁⚂⚃⚄⚅ⅦⅧⅨ"
         handVals = []
         for die in scoringHandDice:
             handVals.append(f"{pipChars[die.curSide.getNum() - 1]}")
         return handVals
     
+    def animateLevelCompleteHand(self, gc):
+            self.DrawService.drawText(2, "Level Completed!",                    0,-self.DrawService.heightGrid * 1.5, center=True)
+            if self.levelCompleteIndex > 0:
+                    self.DrawService.drawText(1, f"stage clear:",               -self.DrawService.widthGrid * 3,-self.DrawService.heightGrid // 2, center=True)
+            if self.levelCompleteIndex > 1:
+                    self.DrawService.drawText(1, f"${gc.stageClearBonus}",      0,-self.DrawService.heightGrid // 2, center=True)
+            if self.levelCompleteIndex > 2:
+                self.DrawService.drawText(1, f"gold pips:",                     -self.DrawService.widthGrid * 3,0, center=True)
+            if self.levelCompleteIndex > 3:
+                self.DrawService.drawText(1, f"${gc.goldPipsThisLevel}",        0,0, center=True)
+            if self.levelCompleteIndex > 4:
+                interestMsg = f"$1 every ${gc.LogicService.interestThreshold} owned ({gc.LogicService.interestMaxPerLevel} max):"
+                self.DrawService.drawText(1, interestMsg,                       -self.DrawService.widthGrid * 3,self.DrawService.heightGrid // 2, center=True)
+            if self.levelCompleteIndex > 5:
+                self.DrawService.drawText(1, f"${gc.interest}",                 0,self.DrawService.heightGrid // 2, center=True)
+            if self.levelCompleteIndex > 6:
+                self.DrawService.drawText(1, f"hands left:",                    -self.DrawService.widthGrid * 3,self.DrawService.heightGrid, center=True)
+            if self.levelCompleteIndex > 7:
+                self.DrawService.drawText(1, f"${gc.LogicService.handsLeft}",   0,self.DrawService.heightGrid, center=True)
+            if self.levelCompleteIndex > 8:
+                self.DrawService.drawText(1, f"------------------------",       0,self.DrawService.heightGrid * 1.25, center=True)
+                self.DrawService.drawText(1, f"total gained:",                  -self.DrawService.widthGrid * 3,self.DrawService.heightGrid * 1.5, center=True)
+            if self.levelCompleteIndex > 9:
+                self.DrawService.drawText(1, f"${gc.goldToAdd}",                0,self.DrawService.heightGrid * 1.5, center=True)
+            if self.levelCompleteIndex > 10:
+                return True
+            
+
+            if not self.startingFrame:#updating info
+                self.startingFrame = pg.time.get_ticks()
+                self.SoundService.hitDict["light"].play()
+                #play sound
+            elif self.startingFrame + self.fps // 2 < pg.time.get_ticks():#animation change
+                self.levelCompleteIndex += 1
+                self.startingFrame = None
+
+    def gameOverAnimation(self):
+            if self.gameOverIndex > 0:
+                self.DrawService.drawText(3, f"GAME",   0,-self.DrawService.heightGrid, center=True)
+            if self.gameOverIndex > 1:
+                self.DrawService.drawText(3, f"OVER",   0,-self.DrawService.heightGrid // 2, center=True)
+            if self.gameOverIndex > 2:
+                return True
+            if not self.startingFrame:#updating info
+                self.startingFrame = pg.time.get_ticks()
+                self.SoundService.hitDict["none"].play()
+                #play sound
+            elif self.startingFrame + self.fps < pg.time.get_ticks():#animation change
+                self.gameOverIndex += 1
+                self.startingFrame = None
+            
     def animateScoringHand(self, LogicService):
         self.scoreString = list(self.scoreString)
         if LogicService.isScoring:

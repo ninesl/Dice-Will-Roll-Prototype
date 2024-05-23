@@ -3,7 +3,7 @@ import pygame as pg
 class SoundService:
     def __init__(self):
         self.music = pg.mixer.Sound("assets/audio/theme.mp3")
-        self.masterVolume = .4
+        self.masterVolume = .2
 
         self.diceDict = {
             "roll": pg.mixer.Sound("assets/audio/dice/rollDice.wav"),
@@ -51,6 +51,5 @@ class SoundService:
                 soundToPlay = self.hitDict["mid"]
             else:
                 soundToPlay = self.hitDict["light"]
-            soundToPlay.set_volume(1)
 
         soundToPlay.play()

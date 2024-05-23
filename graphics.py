@@ -1,5 +1,6 @@
 import pygame as pg
 import shapes
+from dice import blankDie
 
 class DrawService:
     transparentColor = pg.Color(0,0,0,0)
@@ -51,7 +52,7 @@ class DrawService:
         self.marginX = self.widthGrid * .05
         self.marginY = self.heightGrid * .05
 
-        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF, 32)
         # self.screen = pg.display.set_mode((WIDTH,HEIGHT), pg.DOUBLEBUF)
         # self.screen = pg.display.set_mode((0,0), pg.DOUBLEBUF | pg.FULLSCREEN)
 
@@ -104,8 +105,8 @@ class DrawService:
         self.screen.blit(dieFace, [x + self.shadowColorLength, y + self.shadowColorLength])
 
         #background for hovering
-        pg.draw.rect(dieFace, pg.Color(200,200,200), dieFace.get_rect(), border_radius=self.dieRadius)
-        self.screen.blit(dieFace, [x, y])
+        # pg.draw.rect(dieFace, pg.Color(200,200,200, 255), dieFace.get_rect(), border_radius=self.dieRadius)
+        # self.screen.blit(dieFace, [x, y])
 
         #die face
         pg.draw.rect(dieFace, die.curSide.color, dieFace.get_rect(), border_radius=self.dieRadius)
@@ -146,6 +147,20 @@ class DrawService:
 
         #for clickable obj
         return (die, dieRect), pipAndRect
+    
+    def drawDieInfoFaces(self, die):
+        oldDieSide = self.dieSide
+        self.dieSide /= 1.5
+        # xSpacing = 0
+        ySpacing = 0
+        currentSide = die.curSide
+        for sideIndex in range(die.getNumSides()):
+            die.curSide = die.sides[sideIndex]
+            self.drawDie(die, self.WIDTH - self.dieSide - self.marginX, self.marginY + ySpacing)
+            # xSpacing += self.dieSide + self.marginX
+            ySpacing += self.dieSide + self.marginY
+        die.curSide = currentSide
+        self.dieSide = oldDieSide
 
     def drawAllDiceFaces(self, playerDice):
         xSpacing = 0
@@ -168,6 +183,14 @@ class DrawService:
                 xSpacing += self.dieSide + self.marginX
             xSpacing = 0
             ySpacing += self.dieSide + self.marginY
+
+        # for _ in range(5 - len(playerDice)):
+        #     for sideIndex in range(blankDie.getNumSides()):
+        #         self.drawDie(blankDie, self.marginX + xSpacing, self.marginY + ySpacing)
+        #         xSpacing += self.dieSide + self.marginX
+        #     xSpacing = 0
+        #     ySpacing += self.dieSide + self.marginY
+
         self.dieSide = oldDieSide
 
         return dieRectsList, pipRectsList, sideRectsList
@@ -195,14 +218,14 @@ class DrawService:
     def drawLevelText(self, LogicService):
         #game info
         self.drawText(2,f"{LogicService.rockHealth} rocks",                              self.marginX,self.heightGrid + self.marginY, center=True)
-        self.drawText(1,f"{LogicService.rollsLeft} rolls", self.marginX,self.marginY, center=True)
-        self.drawText(1,f"{LogicService.handsLeft} hands", self.marginX,self.heightGrid * .5 + self.marginY, center=True)
+        self.drawText(1,f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", self.marginX,self.marginY, center=True)
+        self.drawText(1,f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", self.marginX,self.heightGrid * .5 + self.marginY, center=True)
 
     def drawPreviousHands(self):
-        yNum = 9.5
+        yNum = 0
         for strHand in self.allRecentHands:
-            self.drawText(1, f"{strHand}", self.marginX, self.heightGrid * yNum - self.marginY)
-            yNum -= .5
+            self.drawText(1, f"{strHand}", self.marginX, self.heightGrid * yNum + self.marginY)
+            yNum += .5
 
     def drawControlsText(self, controlList = []):
         #controls
@@ -299,7 +322,7 @@ class DrawService:
     buttons = []
     def setButtons(self, text, vertical=False):
         num_buttons = len(text)
-        button_width = self.WIDTH / self.gridSpaces * 2
+        button_width = self.WIDTH / self.gridSpaces * 4
         button_height = self.HEIGHT / self.gridSpaces
         spacing = 10  # Adjust spacing as needed
         
@@ -340,8 +363,6 @@ class Button:
     def __init__(self, centerX, centerY, width, height, color, text, font, screen, shadowColor, shadowOffset, borderRadius, action = None, fontColor = pg.Color(255,255,255,255)):
         self.centerX = centerX
         self.centerY = centerY
-        self.width = width
-        self.height = height
         self.borderRadius = borderRadius
         self.color = color
         self.text = text
@@ -371,7 +392,7 @@ class Button:
     def draw(self):
         buttonColor = self.color
         if self.isClicked:
-            buttonColor = self.shadowColor
+            buttonColor = pg.Color(0,0,0)
             
         # Draw button shadow
         shadowRect = self.rect.copy()

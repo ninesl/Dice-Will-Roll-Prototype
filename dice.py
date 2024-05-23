@@ -43,6 +43,7 @@ class Die:
         return self.curSide.getCalculate()
 
 class Side:
+    MAX_PIPS = 9
     def __init__(self, value, color, parentDie):
         self.parentDie = parentDie
         self.pips = []
@@ -69,6 +70,12 @@ class Side:
                 case Mod.BASE:
                     score += 0
         return score
+    
+    def addNewPip(self):
+        if self.getNum() < self.MAX_PIPS:
+            self.pips.append(Pip())
+            return True
+        return False
     
     def getPips(self):
         #todo return pips for mod in DrawService graphics.py
@@ -122,11 +129,15 @@ class Pip:
         return self.mod == Mod.GOLD
 
 class Mod(Enum):
-    ATK = pg.Color(255,0,0,230)
+    ATK = pg.Color(101,0,0)
     # DEF = pg.Color(0,100,255,230)
-    GOLD = pg.Color(255,215,0,230)
-    BASE = pg.Color(0,0,0,230)
+    GOLD = pg.Color(255,171,34)
+    BASE = pg.Color(0,0,0)
     # ATK  = pg.Color(0,0,0,230)
 
     # DEF  = pg.Color(0,0,0,230)
     # GOLD = pg.Color(0,0,0,230)
+
+blankDie = Die(6, pg.Color(255,255,255,255))
+for side in blankDie.sides:
+    side.pips = []

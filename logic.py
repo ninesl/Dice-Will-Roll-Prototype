@@ -8,17 +8,27 @@ class DiceHand(Enum):
     ONE_PAIR        = ["One Pair",       1]
     TWO_PAIR        = ["Two Pair",       1.5]
     THREE_OF_A_KIND = ["Three of a Kind",2]
-    STRAIGHT_SMALL  = ["Small Straight", 3]
-    STRAIGHT_LARGE  = ["Large Straight", 3.5]
+    STRAIGHT_SMALL  = ["Small Straight", 5]
+    STRAIGHT_LARGE  = ["Large Straight", 5.5]
     FULL_HOUSE      = ["Full House",     5]
-    FOUR_OF_A_KIND  = ["Four of a Kind", 10]
-    FIVE_OF_A_KIND  = ["Five of a Kind", 15]
+    FOUR_OF_A_KIND  = ["Four of a Kind", 5]
+    FIVE_OF_A_KIND  = ["Five of a Kind", 7.5]
+    #weird hands
+    #6 dice
+    SIX_OF_A_KIND   = ["Six of a Kind", 12.5]
+    STRAIGHT_LARGER = ["Larger Straight", 12.5] #6 range 
+    TWO_THREE_OF_A_KIND= ["Three of a Kinds", 12.5]
+    #7 dice
+    STRAIGHT_LARGEST= ["Largest Straight", 15] #7 range
+    FULLER_HOUSE   = ["Fuller House", 12.5]
+    SEVEN_OF_A_KIND   = ["Seven of a Kind", 12.5]
 
 class LogicService:
     STARTING_ROLLS = 2
     STARTING_HANDS = 3
 
     interestThreshold = 5
+    interestMaxPerLevel = 5
     stageClearBonus = 4
 
     goldPipsThisLevel = 0
@@ -39,6 +49,8 @@ class LogicService:
 
     def calculateGold(self, playerGold):
         interest = playerGold // self.interestThreshold
+        if interest > self.interestMaxPerLevel:
+            interest = self.interestMaxPerLevel
         stageClearBonus = self.stageClearBonus
         if self.isNextLevel():
             # print(self.goldPipsThisLevel)
@@ -59,8 +71,8 @@ class LogicService:
             for pip in die.curSide.getPips():
                 if pip.isGOLDMod():
                     self.goldPipsThisLevel += 1
-                if die.curSide.hasGOLDMod():
-                    self.goldPipsThisLevel += 1
+                    if die.curSide.hasGOLDMod():
+                        self.goldPipsThisLevel += 1
     
     def selectedScoreTotal(self, handMult = True):
         total = 0
@@ -72,13 +84,13 @@ class LogicService:
         return int(math.ceil(total))
     
     def stopScoring(self, SoundService):
-        self.subtractHealth(self.recentHandScoreNum)
         self.isScoring = False
         for die in self.getSelectedDice():
             die.select()
             die.rollDie()
         self.DrawService.allRecentHands.append(f"{self.recentHandScoreNum} : {self.hand.value[0]}")
         SoundService.diceRollSound(rollsLeft=1)
+        self.subtractHealth(self.recentHandScoreNum)
 
 
     def score(self):
@@ -153,6 +165,31 @@ class LogicService:
         if not handDicePips:
             self.hand = DiceHand.NO_HAND
             self.scoringHandDice = []
+        elif 7 in values:
+            self.hand = DiceHand.SEVEN_OF_A_KIND
+            target_value = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == target_value]
+        elif is_straight(uniqueVals, 7):
+            self.hand = DiceHand.STRAIGHT_LARGEST
+            straight = is_straight(uniqueVals, 7)
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in straight]
+        elif 6 in values:
+            self.hand = DiceHand.SIX_OF_A_KIND
+            target_value = max(count, key=count.get)
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() == target_value]
+        elif is_straight(uniqueVals, 6):
+            self.hand = DiceHand.STRAIGHT_LARGER
+            straight = is_straight(uniqueVals, 6)
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in straight]
+        elif values.count(3) == 2:
+            self.hand = DiceHand.TWO_THREE_OF_A_KIND
+            three_kinds = [k for k, v in count.items() if v == 3]
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in three_kinds]
+        elif 4 in values and 3 in values:
+            self.hand = DiceHand.FULLER_HOUSE
+            four_kind = [k for k, v in count.items() if v == 4]
+            three_kind = [k for k, v in count.items() if v == 3]
+            self.scoringHandDice = [die for die in self.getSelectedDice() if die.curSide.getNum() in four_kind + three_kind]
         elif 5 in values:
             self.hand = DiceHand.FIVE_OF_A_KIND
             target_value = max(count, key=count.get)

@@ -17,10 +17,11 @@ class EventService:
     def dieHovered(self, dicePipRect):
         self.update_pos()
         for die, rect in dicePipRect:
-            if rect.collidepoint(self.pos):
-                die.isHovered = True
             if not rect.collidepoint(self.pos):
                 die.isHovered = False
+            if rect.collidepoint(self.pos):
+                die.isHovered = True
+                return die
 
     def selectPip(self, pipRect):
         self.update_pos()
