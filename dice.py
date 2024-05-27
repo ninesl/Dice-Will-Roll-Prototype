@@ -4,15 +4,37 @@ import pygame as pg
 from enum import Enum
 
 class Die:
-    def __init__(self, sides, color):
+    def __init__(self, sides, color, setNum = None):
         self.isSelected = False
         self.num = -1
         self.isHovered = False
+        self.baseColor = color
 
         self.sides = []
         for i in range(sides):
-            self.sides.append( Side(i + 1, color, self) ) # create a side with i+1 pips
+            if setNum:
+                self.sides.append( Side(setNum, color, self) )
+            else: 
+                self.sides.append( Side(i + 1, color, self) ) 
+                # create a side with i+1 pips
         self.curSide = self.sides[0]
+
+    # def copySelf(self, deleteSides = []):
+    #     if deleteSides:
+    #         for index in deleteSides:
+
+
+    # +1 for each 'thing'
+    def getSellValue(self):
+        val = 0
+        val += self.getNumSides()
+        for side in self.sides:
+            if not side.mods:
+                val += 1
+            for pip in side.getPips():
+                if pip.mod != Mod.BASE:
+                    val += 1
+        return val // 3
     
     def getNumSides(self):
         return len(self.sides)
@@ -41,9 +63,44 @@ class Die:
     
     def calculate(self):
         return self.curSide.getCalculate()
+    
+    def getMaxNum(self):
+        max = Side(0, self.baseColor, self).getNum()
+        for side in self.sides:
+            if max < side.getNum():
+                max = side.getNum()
+        return max
+
+    def addSide(self):
+        newSideNum = self.getMaxNum() + 1
+        self.sides.append( Side(newSideNum, self.baseColor, self) )
+
+    def cascadeColors(self, incr):
+        minusIncr = 0
+        for side in self.sides:
+            r = side.color.r + minusIncr
+            g = side.color.g + minusIncr
+            b = side.color.b + minusIncr
+
+            if r > 255:
+                r = 255
+            if g > 255:
+                g = 255
+            if b > 255:
+                b = 255
+
+            if r < 0:
+                r = 0
+            if g < 0:
+                g = 0
+            if b < 0:
+                b = 0
+
+            side.color = pg.Color(r,g,b)
+            minusIncr += incr
 
 class Side:
-    MAX_PIPS = 9
+    MAX_PIPS = 13
     def __init__(self, value, color, parentDie):
         self.parentDie = parentDie
         self.pips = []
@@ -52,7 +109,8 @@ class Side:
         self.color = color
         self.baseScore = 1
         for _ in range(value):
-            self.pips.append(Pip())
+            # self.pips.append(Pip())
+            self.addNewPip()
     
     def getCalculate(self):
         score = 0
@@ -138,6 +196,6 @@ class Mod(Enum):
     # DEF  = pg.Color(0,0,0,230)
     # GOLD = pg.Color(0,0,0,230)
 
-blankDie = Die(6, pg.Color(255,255,255,255))
-for side in blankDie.sides:
-    side.pips = []
+blankDie = Die(6, pg.Color(0,0,0,255), setNum=0)
+# for side in blankDie.sides:
+#     side.pips = []

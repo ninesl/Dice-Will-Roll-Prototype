@@ -54,10 +54,11 @@ print(" ⚀ ⚁ ⚂ ⚃ ⚄ ⚅")
 keyBinds = {
     "stage_level" : {
         pg.K_ESCAPE: "quit",
-        # pg.K_SPACE: "roll",
+        pg.K_SPACE: "roll",
         1: "level_select",
-        3: "hover_select",
-        # pg.K_q: "score",
+        # 2: "hover_select",
+        3: "score",
+        pg.K_p: "toggle_control_mode"
         # pg.K_p: "reset",
         # pg.K_o: "harder",
         # pg.K_w: "stage_shop",
@@ -77,13 +78,14 @@ controls = {
     "level_select"  :gc.levelSelect,
     "quit"  :gc.quitGame,
     "score" :gc.scoreDice,
-    "reset" :gc.resetLevel,
+    "reset" :gc.resetGame,
     "harder":gc.harderLevel,
     "stage_shop"  :gc.goToShop,
     "stage_level" :gc.goToLevel,
-    "hover_select":gc.drawDieInfoFaces,
+    # "hover_select":gc.drawDieInfoFaces,
     "newdie":gc.newDice,
-    "shop_select":gc.shopSelect
+    "shop_select":gc.shopSelect,
+    "toggle_control_mode": gc.toggleRollClickMode,
 }
 
 GAME_STATE = "stage_level"
@@ -112,17 +114,13 @@ while gc.GOING:
 
         except KeyError:
             pass  # Explicitly doing nothing
+
     gc.gameLoop()
-
-
     # fps = int(clock.get_fps())
-    # gc.DrawService.drawText(1, f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05)
+    # gc.DrawService.drawText(f"{fps} fps", gc.WIDTH/10 * 9.25 - gc.WIDTH/10 * .05, gc.HEIGHT/10 * .05, fontIndex=1)
+
     pg.display.update()
-    clock.tick(60)
-    # clock.tick_busy_loop(fps)
+    # clock.tick(60)
+    clock.tick_busy_loop(fps)
     
-    # fpsCount += 1
-    # if fpsCount >= 120:
-    #     print(f"gc.LogicService.rockHealth : {gc.LogicService.rockHealth}")
-    #     print(f"gc.DrawService.NUM_SHAPES  : {gc.DrawService.NUM_SHAPES}")
-    #     fpsCount = 0
+pg.quit()

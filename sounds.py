@@ -3,14 +3,16 @@ import pygame as pg
 class SoundService:
     def __init__(self):
         self.music = pg.mixer.Sound("assets/audio/theme.mp3")
-        self.masterVolume = .2
+        self.masterVolume = .05
 
         self.diceDict = {
             "roll": pg.mixer.Sound("assets/audio/dice/rollDice.wav"),
             "stop": pg.mixer.Sound("assets/audio/dice/stopRollDice.wav"),
             "select": pg.mixer.Sound("assets/audio/dice/selectDie.wav"),
             "deselect": pg.mixer.Sound("assets/audio/dice/deselectDie.wav"),
-            "tap": pg.mixer.Sound("assets/audio/dice/tap.wav")
+            "tap": pg.mixer.Sound("assets/audio/dice/tap.wav"),
+            "error": pg.mixer.Sound("assets/audio/dice/error.wav"),
+            "preview": pg.mixer.Sound("assets/audio/dice/preview.wav")
         }
         self.hitDict = {
             "light": pg.mixer.Sound("assets/audio/hit/lightHit.wav"),

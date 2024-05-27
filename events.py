@@ -23,6 +23,15 @@ class EventService:
                 die.isHovered = True
                 return die
 
+    def sideHovered(self, sideRect):
+        self.update_pos()
+        for side, rect in sideRect:
+            if not rect.collidepoint(self.pos):
+                side.parentDie.isHovered = False
+            if rect.collidepoint(self.pos):
+                side.parentDie.isHovered = True
+                return side.parentDie.getSellValue()
+
     def selectPip(self, pipRect):
         self.update_pos()
         for pipTuples in pipRect:

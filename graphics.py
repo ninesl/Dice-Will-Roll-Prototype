@@ -1,7 +1,7 @@
 import pygame as pg
 import shapes
 from dice import blankDie
-
+# pg.font.init()
 class DrawService:
     transparentColor = pg.Color(0,0,0,0)
     shadowColor = pg.Color(0,0,0,105)
@@ -72,16 +72,13 @@ class DrawService:
         # background = pg.image.load('assets/background.png')
         # self.screen.blit(background, (0,0))
 
-    def drawDieFace(self, x, y, die, isInScoringDice = False):
+    def drawDieFace(self, x, y, die, isInScoringDice=False):
         dieFace = pg.Surface((self.dieSide, self.dieSide), pg.SRCALPHA)
-        
-        #TODO find dieFace color. I do not want a pg.Color in dice.py if possible
-
-        dieFace.fill(self.transparentColor) #background of surface
+        dieFace.fill(self.transparentColor)  # background of surface
 
         if die.isSelected:
             # Apply scaling and outline for selected die
-            outline_thickness = self.dieRadius/3  # Thickness of the outline
+            outline_thickness = self.dieRadius / 3  # Thickness of the outline
             scaled_die_side = int(self.dieSide * 1.2)
             dieFace = pg.transform.scale(dieFace, (scaled_die_side, scaled_die_side))
 
@@ -89,8 +86,8 @@ class DrawService:
                                    y - self.dieSide * 0.1 - outline_thickness,
                                    scaled_die_side + outline_thickness * 2,
                                    scaled_die_side + outline_thickness * 2)
-            
-            #outline for scoring
+
+            # outline for scoring
             if die.isSelected:
                 if isInScoringDice:
                     pg.draw.rect(self.screen, self.scoredColor, outline_rect, border_radius=self.dieRadius)
@@ -100,20 +97,30 @@ class DrawService:
             x = int(x - self.dieSide * .1)
             y = int(y - self.dieSide * .1)
 
-        #shadowColor
-        pg.draw.rect(dieFace, self.shadowColor, dieFace.get_rect(), border_radius=self.dieRadius)
-        self.screen.blit(dieFace, [x + self.shadowColorLength, y + self.shadowColorLength])
+        shadowSurface = pg.Surface(dieFace.get_size(), pg.SRCALPHA)
+        shadowSurface.fill(self.transparentColor)
 
-        #background for hovering
-        # pg.draw.rect(dieFace, pg.Color(200,200,200, 255), dieFace.get_rect(), border_radius=self.dieRadius)
-        # self.screen.blit(dieFace, [x, y])
+        # Draw the appropriate shape based on the number of sides
+        numSides = die.getNumSides()
+        if numSides <= 2:
+            self.drawCircle(dieFace, die.curSide.color)
+            self.drawCircle(shadowSurface, self.shadowColor)
+        else:
+            self.drawSquare(dieFace, die.curSide.color)
+            self.drawSquare(shadowSurface, self.shadowColor)
 
-        #die face
-        pg.draw.rect(dieFace, die.curSide.color, dieFace.get_rect(), border_radius=self.dieRadius)
+        self.screen.blit(shadowSurface, [x + self.shadowColorLength, y + self.shadowColorLength])
         self.screen.blit(dieFace, [x, y])
 
-        return dieFace.get_rect().move(x,y) #return rect
-    
+        return dieFace.get_rect().move(x, y)  # return rect
+
+    def drawCircle(self, surface, color):
+        radius = surface.get_width() // 2
+        pg.draw.circle(surface, color, (radius, radius), radius)
+
+    def drawSquare(self, surface, color):
+        pg.draw.rect(surface, color, (0, 0, surface.get_width(), surface.get_height()), border_radius=self.dieRadius)
+
     def getTotalDiceWidth(self, dice):
         return len(dice) * self.dieSide + (len(dice) - 1) * self.dieSpacing
 
@@ -150,7 +157,7 @@ class DrawService:
     
     def drawDieInfoFaces(self, die):
         oldDieSide = self.dieSide
-        self.dieSide /= 1.5
+        self.dieSide = self.HEIGHT / 14
         # xSpacing = 0
         ySpacing = 0
         currentSide = die.curSide
@@ -195,43 +202,58 @@ class DrawService:
 
         return dieRectsList, pipRectsList, sideRectsList
 
-    def drawText(self, index, msg, x, y, color = pg.Color(255,255,255), center = False):
-        if center:
-            text = self.gameFonts[index].render(str(msg), True, self.shadowColor)
-            rect = text.get_rect(center = (self.WIDTH//2 + 2 + x, self.HEIGHT//2 + 2 + y))
-            self.screen.blit(text, rect)
-
-            text = self.gameFonts[index].render(str(msg), True, color)
-            rect = text.get_rect(center = (self.WIDTH//2 + x, self.HEIGHT//2 + y))
-            self.screen.blit(text, rect)
-        else:
-            img = self.gameFonts[index].render(str(msg), True, self.shadowColor)
-            self.screen.blit(img, (x+2,y+2))
-            img = self.gameFonts[index].render(str(msg), True, color)
-            self.screen.blit(img, (x,y))
+    # default_font = pg.font.Font(None, 20)
+    def drawText(self, msg, x, y, color = pg.Color(255,255,255), center = False, fontIndex = None):
+        if fontIndex != None:
+            if center:
+                text = self.gameFonts[fontIndex].render(str(msg), True, self.shadowColor)
+                rect = text.get_rect(center = (self.WIDTH//2 + 2 + x, self.HEIGHT//2 + 2 + y))
+                self.screen.blit(text, rect)
+                text = self.gameFonts[fontIndex].render(str(msg), True, color)
+                rect = text.get_rect(center = (self.WIDTH//2 + x, self.HEIGHT//2 + y))
+                self.screen.blit(text, rect)
+            else:
+                img = self.gameFonts[fontIndex].render(str(msg), True, self.shadowColor)
+                self.screen.blit(img, (x+2,y+2))
+                img = self.gameFonts[fontIndex].render(str(msg), True, color)
+                self.screen.blit(img, (x,y))
 
     def drawHandText(self, LogicService, diceChars):
-        currentHandStr = str(f"{LogicService.hand.value[0]}  X {LogicService.hand.value[1]}")
-        self.drawText(2, currentHandStr, 0,-self.heightGrid * 1.5, center=True)
-        self.drawText(2, f"{diceChars}", 0,-self.heightGrid * .75, center=True)
+        currentHandStr = f"{LogicService.hand.value[0]}"
+        currentHandMultStr = f"x{LogicService.hand.value[1]}"
+        self.drawText(currentHandStr, 0,0, center=True, fontIndex=0)
+        self.drawText(currentHandMultStr, 0,self.heightGrid//1.5, center=True, fontIndex=1)
+        self.drawText(f"{diceChars}", 0,-self.heightGrid * .75, center=True, fontIndex=2)
 
     def drawLevelText(self, LogicService):
         #game info
-        self.drawText(2,f"{LogicService.rockHealth} rocks",                              self.marginX,self.heightGrid + self.marginY, center=True)
-        self.drawText(1,f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", self.marginX,self.marginY, center=True)
-        self.drawText(1,f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", self.marginX,self.heightGrid * .5 + self.marginY, center=True)
+        self.drawText(f"{LogicService.rockHealth} rocks",0,-self.heightGrid * 4.5 + self.marginY, center=True, fontIndex=2)
+        self.drawLevelInfo(LogicService)
+
+    def drawLevelInfo(self, LogicService):
+        self.drawText(f"{LogicService.rollsLeft}/{LogicService.STARTING_ROLLS} rolls", self.widthGrid,-self.heightGrid * 2, center=True, fontIndex=1)
+        self.drawText(f"{LogicService.handsLeft}/{LogicService.STARTING_HANDS} hands", -self.widthGrid,-self.heightGrid * 2, center=True, fontIndex=1)
 
     def drawPreviousHands(self):
         yNum = 0
         for strHand in self.allRecentHands:
-            self.drawText(1, f"{strHand}", self.marginX, self.heightGrid * yNum + self.marginY)
+            self.drawText(f"{strHand}", self.marginX, self.heightGrid * yNum + self.marginY, fontIndex=1)
             yNum += .5
+            
+    def drawRevealedHands(self, revealedHandsDict):
+        yNum = 0
+        for key, value in revealedHandsDict.items():
+            self.drawText(f"{key}: x{value}", self.marginX, self.heightGrid * yNum + self.marginY, fontIndex=1)
+            yNum += .5
+
+    def drawBestHand(self, bestHandStr):
+        self.drawText(f"{bestHandStr}",0,-self.heightGrid * 2.4,fontIndex=1, center=True)
 
     def drawControlsText(self, controlList = []):
         #controls
         heightModifier = self.gridSpaces - len(controlList) / 2
         for controlText in controlList:
-            self.drawText(1, controlText, self.widthGrid * 8 + self.marginX * 2, self.heightGrid * heightModifier - self.marginY)
+            self.drawText(controlText, self.widthGrid * 8 + self.marginX * 2, self.heightGrid * heightModifier - self.marginY, fontIndex=1)
             heightModifier += .5
 
     #draws pips onto face. Call after drawDieFace()
@@ -257,7 +279,7 @@ class DrawService:
             for space in row:
                 if space == 1: # pip found
                     # Apply scaling and outline for selected die
-                    outline_thickness = 5  # Thickness of the outline
+                    outline_thickness = 3 # Thickness of the outline
                     scaled_pip = int(pipSize * 1.1)
 
                     # Calculate outline rectangle position and size
@@ -283,17 +305,17 @@ class DrawService:
     def getPipGrid(self, d, pipGridNum):
         numPips = d.curSide.getNum()
         pipGrid = [[0]*pipGridNum for _ in range(pipGridNum)] #7x7 array
-        
+        # numSides = d.getNumSides()
         match numPips:
             case 1:
                 pipGrid[4] = [0,0,0,1,0,0,0]
             case 2:
-                pipGrid[2] = [0,1,0,0,0,0,0]
-                pipGrid[6] = [0,0,0,0,0,1,0]
-            case 3:
                 pipGrid[2] = [0,0,0,0,0,1,0]
-                pipGrid[4] = [0,0,0,1,0,0,0]
                 pipGrid[6] = [0,1,0,0,0,0,0]
+            case 3:
+                pipGrid[2] = [0,1,0,0,0,0,0]
+                pipGrid[4] = [0,0,0,1,0,0,0]
+                pipGrid[6] = [0,0,0,0,0,1,0]
             case 4:
                 pipGrid[2] = [0,1,0,0,0,1,0]
                 pipGrid[6] = [0,1,0,0,0,1,0]
@@ -317,13 +339,46 @@ class DrawService:
                 pipGrid[2] = [0,1,0,1,0,1,0]
                 pipGrid[4] = [0,1,0,1,0,1,0]
                 pipGrid[6] = [0,1,0,1,0,1,0]
+            case 10:
+                pipGrid[2] = [0,1,0,1,0,1,0]
+                pipGrid[3] = [0,0,0,0,1,0,0]
+                pipGrid[4] = [0,1,0,1,0,1,0]
+                pipGrid[5] = [0,0,0,0,0,0,0]
+                pipGrid[6] = [0,1,0,1,0,1,0]
+            case 11:
+                pipGrid[2] = [0,1,0,1,0,1,0]
+                pipGrid[3] = [0,0,0,0,1,0,0]
+                pipGrid[4] = [0,1,0,1,0,1,0]
+                pipGrid[5] = [0,0,1,0,0,0,0]
+                pipGrid[6] = [0,1,0,1,0,1,0]
+            case 12:
+                pipGrid[2] = [0,1,0,1,0,1,0]
+                pipGrid[3] = [0,0,0,0,1,0,0]
+                pipGrid[4] = [0,1,0,1,0,1,0]
+                pipGrid[5] = [0,0,1,0,1,0,0]
+                pipGrid[6] = [0,1,0,1,0,1,0]
+            case 13:
+                pipGrid[2] = [0,1,0,1,0,1,0]
+                pipGrid[3] = [0,0,1,0,1,0,0]
+                pipGrid[4] = [0,1,0,1,0,1,0]
+                pipGrid[5] = [0,0,1,0,1,0,0]
+                pipGrid[6] = [0,1,0,1,0,1,0]
+
+        if d.getNumSides() <= 2:
+            match numPips:
+                case 1:
+                    pipGrid[4] = [0,0,0,1,0,0,0]
+                case 2:
+                    pipGrid[2] = [0,0,0,0,1,0,0]
+                    pipGrid[6] = [0,0,1,0,0,0,0]
+
         return pipGrid
     
     buttons = []
     def setButtons(self, text, vertical=False):
         num_buttons = len(text)
         button_width = self.WIDTH / self.gridSpaces * 4
-        button_height = self.HEIGHT / self.gridSpaces
+        button_height = self.HEIGHT / (self.gridSpaces * 1.5)
         spacing = 10  # Adjust spacing as needed
         
         # Calculate total dimensions and starting positions
